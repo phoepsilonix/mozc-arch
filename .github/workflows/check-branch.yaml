@@ -28,6 +28,10 @@ jobs:
           git config user.email phoepsilonix@phoepsilonix.love
           git config --global push.gpgSign if-asked
 
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_REPO_SSH_KEY }}
+
       - name: Mozc commit check
         id: sync_mozc
         env:
@@ -48,6 +52,8 @@ jobs:
       - name: Mozc Version Check
         id: check_mozc
         if: ${{ steps.sync_mozc.outputs.should_exit != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Changes detected."
           echo
@@ -57,13 +63,10 @@ jobs:
           DEB_COMMIT=$(cat last_commit.txt)
           echo $MOZC_COMMIT
           echo $DEB_COMMIT
-          echo $MOZC_COMMIT > last_commit.txt
-          git commit -m "last commit is $MOZC_COMMIT" last_commit.txt
-          echo "mozc_commit=$MOZC_COMMIT" >> $GITHUB_OUTPUT
 
           # MOZC_VERSION CHECK
           echo "Mozc version(tag) check"
-          MOZC_TAG_1="v""$(head -n1 debian/changelog|grep -Eo "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")"
+          MOZC_TAG_1="v""$(grep "^pkgver" PKGBUILD|head -n1| cut -f2 -d'=')"
           echo "Resetting local master to FETCH_HEAD..."
           git checkout FETCH_HEAD
           source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
@@ -78,19 +81,14 @@ jobs:
               OSS_COMMIT=$(git log -1 --pretty=%H)
             fi
             git checkout main
-            git checkout -- changelog
-            sed "s/MOZC_VER/${MOZC_TAG_2}/" changelog > changelog.tmp1
-            UPDATE_DATE=$(LC_ALL=C date -R)
-            sed "s/UPDATE_DATE/${UPDATE_DATE}/" -i changelog.tmp1
-            cat changelog.tmp1 debian/changelog > changelog.tmp
-            mv changelog.tmp debian/changelog
-            rm -f changelog.tmp1
-            #git checkout -- changelog
-            git commit -m "chagelog: $MOZC_TAG_2 at $UPDATE_DATE" debian/changelog
           fi
 
           echo "Pushing changes to origin..."
           git checkout main
+          echo $MOZC_COMMIT > last_commit.txt
+          echo "mozc_commit=$MOZC_COMMIT" >> $GITHUB_OUTPUT
+          git commit -m "last commit is $MOZC_COMMIT" last_commit.txt
+          ./update.sh
           git push origin main --force
 
           TAG=commit-$MOZC_COMMIT
