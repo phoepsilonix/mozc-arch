@@ -40,8 +40,8 @@ jobs:
         shell: bash
         run: |
           echo "container_name=${{ matrix.os }}" >> $GITHUB_OUTPUT
-          pacman -Syu
-          pacman -S sudo wget git
+          pacman -Syu --noconfirm
+          pacman -S sudo wget git --noconfirm
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -145,7 +145,7 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          sudo pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa clang ibus rustup
+          sudo pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa clang ibus rustup --noconfirm
       - name: Install mold linker
         uses: rui314/setup-mold@staging
         with:
