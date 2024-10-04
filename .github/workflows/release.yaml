@@ -16,14 +16,17 @@ jobs:
   release:
     strategy:
       matrix:
-        os: [archlinux]
+        os: [archlinux, manjarolinux]
         include:
           - os: archlinux
             container: archlinux:latest
+          - os: manjarolinux
+            container: docker.io/manjarolinux/build:latest
 
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
+      options: --init
       env:
         SCCACHE_GHA_ENABLED: "true"
         RUSTC_WRAPPER: "sccache"
@@ -35,13 +38,13 @@ jobs:
         run: |
           echo "Event name: ${{ github.event_name }}"
           echo "Event payload: ${{ toJson(github.event.client_payload) }}"
-      - name: install sudo and wget and git (Linux)
+      - name: install sudo and git (Linux)
         id: startup
         shell: bash
         run: |
           echo "container_name=${{ matrix.os }}" >> $GITHUB_OUTPUT
-          pacman -Syu --noconfirm
-          pacman -S sudo wget git --noconfirm
+          pacman -Syu --noconfirm --needed
+          pacman -S sudo git --noconfirm --needed
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -50,6 +53,18 @@ jobs:
         run: |
           export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
           git config --global --add safe.directory $GITHUB_WORKSPACE
+          COMMIT=$(grep "^_mozc_commit" ${{ matrix.os }}/PKGBUILD|cut -f2 -d"=")
+          TAG=${GITHUB_REF##*/}
+          if [[ $TAG == "main" ]];then
+            echo "Running release for branch: ${{ github.event.client_payload.repo.branch }}"
+            echo "Tag: ${{ github.event.client_payload.repo.tag }}"
+            TAG="${{ github.event.client_payload.repo.tag }}"
+          fi
+          NEW_COMMIT=${TAG#commit-}
+          if [[ "$COMMIT" != "$NEW_COMMIT" ]]; then
+            git push origin $TAG -d || true
+            exit 1
+          fi
       - name: Setup non-root user
         run: |
           sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
@@ -57,8 +72,30 @@ jobs:
           sudo chown -R nonroot:nonroot /github/workspace
           sudo -u nonroot whoami
           sudo -u nonroot id
+          PATH=/usr/local/bin:$PATH
+          CC=clang
+          CXX=clang++
+          LD=ld.mold
+          echo "export PATH=$PATH" |sudo tee -a /etc/environment
+          echo "export CC=$CC" |sudo tee -a /etc/environment
+          echo "export CXX=$CXX" |sudo tee -a /etc/environment
+          echo "export LD=$LD" |sudo tee -a /etc/environment
           whoami
           id
+          source /etc/makepkg.conf
+          echo $CPPFLAGS
+          echo $CFLAGS
+          echo $CXXFLAGS
+          echo $LDFLAGS
+          echo 
+          sudo -u nonroot cp makepkg.conf /github/workspace/.makepkg.conf
+          source ./makepkg.conf
+          echo $CPPFLAGS
+          echo $CFLAGS
+          echo $CXXFLAGS
+          echo $LDFLAGS
+          echo "Defaults    timestamp_timeout=30"|sudo tee -a /etc/sudoers
+        
       - name: Setup Mozc source for Tag
         run: |
           git clone --filter=tree:0 -b master https://github.com/phoepsilonix/mozc.git source
@@ -74,6 +111,7 @@ jobs:
         run: |
           git config --global push.gpgSign if-asked
           TAG=${GITHUB_REF##*/}
+          pushd .
           if [[ $TAG == "main" ]];then
             echo "Running release for branch: ${{ github.event.client_payload.repo.branch }}"
             echo "Tag: ${{ github.event.client_payload.repo.tag }}"
@@ -81,7 +119,7 @@ jobs:
           fi
           if [[ "$TAG" =~ ^commit- ]]; then
             cd source
-            COMMIT=$(git log -1 ${TAG#commit-} --pretty=%h)
+            COMMIT=$(git log -2 ${TAG#commit-} --pretty=%h|tail -n1)
             git checkout $COMMIT
             echo $TAG
             cd ..
@@ -137,59 +175,76 @@ jobs:
             echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
             echo "tag_commit=$(git log -1 --pretty=%H ${COMMIT})" >> $GITHUB_OUTPUT
           fi
+          popd
+          SHA512SUMS=$(grep sha512sums= archlinux/PKGBUILD|sed "s|.*'\(.*\)'.*|\1|")
+          echo "fcitx5_mozc_checksum=$SHA512SUMS" >> $GITHUB_OUTPUT
+
       - name: check variables
         run: |
           echo "${{ steps.variables.outputs.tag_name }}"
           echo "${{ steps.variables.outputs.tag_name_2 }}"
           echo "${{ steps.variables.outputs.tag_commit }}"
+          echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
+
       - name: install build tools (Linux)
         shell: bash
         run: |
-          sudo pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa clang ibus rustup --noconfirm
-      - name: Install mold linker
-        uses: rui314/setup-mold@staging
-        with:
-          mold-version: 2.34.0
-          make-default: true
+          pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa llvm clang ibus bazel rustup mold --noconfirm --needed
+          curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.34.1/mold-2.34.1-x86_64-linux.tar.gz
+          tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
       - name: Mount bazel cache
         uses: actions/cache@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
-          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_checksum }}
+          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_checksum }}
       - name: Install bazel
         run: |
           mkdir -p /usr/local/bin
-          wget -qO /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-x86_64
-          sudo chmod a+x /usr/local/bin/bazel
+          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-x86_64
+          chmod +x /usr/local/bin/bazel
           bazel --version
       - name: Build
         shell: bash
         run: |
-          sudo chown -R nonroot:nonroot .
-          sudo pacman -S fcitx5-qt --noconfirm
-          sudo -u nonroot makepkg -Cf -p PKGBUILD
-          sudo pacman -Rs fcitx5-qt --noconfirm
-          sudo pacman -S fcitx-qt6 --noconfirm
+          sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
+          sudo -u nonroot bazel --version
+          sudo -u nonroot ld.mold --version
+          chown -R nonroot:nonroot .
+          cd ${{ matrix.os }}
+          sudo -u nonroot git clone --filter=tree:0 -b fcitx --mirror https://github.com/fcitx/mozc.git mozc
+          sudo -u nonroot git config --add safe.directory $PWD/mozc
+          cd mozc
+          sudo -u nonroot git worktree add tmp
+          sudo -u nonroot git worktree remove tmp
+          sudo -u nonroot git branch -d tmp
+          cd ..
+          pacman -S fcitx5-qt --noconfirm --needed
+          sudo -u nonroot makepkg -osC --noconfirm
+          sudo -u nonroot makepkg -ef -p PKGBUILD
+          pacman -Rs fcitx5 fcitx5-qt --noconfirm
+          pacman -S fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
-          sudo pacman -Rs fcitx-qt6 --noconfirm
-          mkdir -p release
-          mv *.pkg.tar.zst release/
+          pacman -Rs fcitx fcitx-qt6 --noconfirm
+          sudo -u nonroot mkdir -p ../release
+          sudo -u nonroot mv *.pkg.tar.zst ../release/
       - name: Generate release note
         id: release_note
         shell: bash
         run: |
-          git checkout main
-          git checkout HEAD~ -- last_commit.txt
+          sudo -u nonroot git checkout main
+          # FCITX_COMMIT
+          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          git checkout HEAD -- last_commit.txt
+          sudo -u nonroot git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
           cd source
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
-            NOTE=$(git log -1)
+            # Mozc master branch
+            NOTE=$(git log -1 master)
           else
             #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
-            NOTE=$(git log -1)
+            NOTE=$(git log -1 master)
           fi
           {
           echo "release_note<<EOF"
@@ -215,58 +270,40 @@ jobs:
           path: "/home/runner/.rustup"
           key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
           restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
-      - name: Install Rust for -with-jp-dict
+      - name: Install Rust(non root) for -with-jp-dict
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
           echo "Running Rust program for ${{ matrix.os }}"
-      - name: Added SudachiDict for -with-jp-dict
-        run: |
-          git clone --filter=tree:0 --single-branch https://github.com/phoepsilonix/mozcdict-ext.git
-          cd mozcdict-ext/sudachi
-          . "$HOME/.cargo/env"
-          _sudachidict_date=$(curl -s 'http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/' | grep -o '<td>[0-9]*</td>' | grep -o '[0-9]*' | sort -n | tail -n 1)
-          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/small_lex.zip"
-          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/core_lex.zip"
-          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/notcore_lex.zip"
-          unzip small_lex.zip
-          unzip core_lex.zip
-          unzip notcore_lex.zip
-          cat small_lex.csv core_lex.csv notcore_lex.csv > sudachi.csv
-          rm *lex.csv
-          rustup update stable
-          rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1)
-          cargo build --release --target $TARGET
-          ./target/$TARGET/release/dict-to-mozc -s -i ../../source/src/data/dictionary_oss/id.def -f sudachi.csv > ./all-dict.txt
-          awk -f dup.awk all-dict.txt > finish-dict.txt
-          cat finish-dict.txt |sudo tee -a ../../src/mozc/src/data/dictionary_oss/dictionary00.txt
-          rm all-dict.txt finish-dict.txt
+
       - name: Build
         shell: bash
         run: |
-          rm -rf *zst
-          sudo pacman -S fcitx5-qt --noconfirm
+          cd ${{ matrix.os }}
+          sudo -u nonroot rm -rf *pkg.tar.zst
+          pacman -S fcitx5-qt --noconfirm --needed
+          sudo -u nonroot makepkg -osC -p PKGBUILD.Dict --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
-          sudo pacman -Rs fcitx5-qt --noconfirm
-          sudo pacman -S fcitx-qt6 --noconfirm
+          pacman -Rs fcitx5 fcitx5-qt --noconfirm
+          pacman -S fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
-          sudo pacman -Rs fcitx-qt6 --noconfirm
-          mkdir -p release_2
-          mv *.pkg.tar.zst release_2/
+          pacman -Rs fcitx fcitx-qt6 --noconfirm
+          sudo -u nonroot mkdir -p ../release_2
+          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
       - name: Generate release note
         id: release_note_2
         shell: bash
         run: |
           git checkout main
-          git checkout HEAD~ -- last_commit.txt
+          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          git checkout HEAD -- last_commit.txt
+          sudo -u nonroot git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
           cd source
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
-            NOTE=$(git log -1)
+            NOTE=$(git log -1 master)
           else
            #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
-            NOTE=$(git log -1)
+            NOTE=$(git log -1 master)
           fi
           {
           echo "release_note<<EOF"

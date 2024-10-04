@@ -1,9 +1,10 @@
-# Build packages of Mozc for Arch
+# Build packages of Mozc with SudachiDict for Arch
 ### Build
+#### Normal
 ```sh
 makepkg -sp PKGBUILD
 ```
-or
+#### with SudachiDict
 ```
 makepkg -sp PKGBUILD.Dict
 ```

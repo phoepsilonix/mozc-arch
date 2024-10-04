@@ -7,14 +7,46 @@ on:
 
 env:
   ORIGINAL_REPO: "phoepsilonix/mozc"
+  FCITX_REPO: "fcitx/mozc"
 
 jobs:
   sync-master:
+    strategy:
+      matrix:
+        os: [manjarolinux]
+        include:
+          - os: manjarolinux
+            container: docker.io/manjarolinux/base:latest
     runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+      options: --cap-add=SYS_ADMIN --cap-add=SETPCAP
     outputs:
-      mozc_commit: ${{ steps.sync_mozc.outputs.mozc_commit }}
+      should_exit: ${{ steps.sync_mozc.outputs.should_exit }}
+      mozc_commit: ${{ steps.check_mozc.outputs.mozc_commit }}
+      mozc_tag: ${{ steps.check_mozc.outputs.mozc_tag }}
 
     steps:
+      - name: Install Git and Ssh and GPG
+        run: |
+          pacman -Syu --noconfirm --needed git openssh gnupg
+          export GPG_TTY=$(tty)
+          gpg-agent --daemon
+          echo -e "use-agent\npinentry-mode loopback\n"|tee -a /github/home/.gnupg/gpg.conf
+          LANG=C gpg-connect-agent updatestartuptty /bye || true
+          gpg-connect-agent --verbose
+          gpgconf --kill gpg-agent
+          gpg-agent --daemon
+          ls -l /github/home/.gnupg/S.gpg-agent
+          echo $GPG_TTY
+          echo $GNUPGHOME
+          export GNUPGHOME=/github/home/.gnupg
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global push.gpgSign if-asked
+
+      - name: non root user
+        run: |
+          useradd -m nonroot
       - name: Checkout
         uses: actions/checkout@v4
         env:
@@ -22,28 +54,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "Masato TOYOSHIMA"
-          git config user.email phoepsilonix@phoepsilonix.love
-          git config --global push.gpgSign if-asked
-
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE_REPO_SSH_KEY }}
+
+      - name: Import bot's GPG key for signing commits
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.BOT_GPG_PASSPHRASE }}
 
       - name: Mozc commit check
         id: sync_mozc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config user.name "Masato TOYOSHIMA"
+          git config user.email phoepsilonix@phoepsilonix.love
+          sudo chown -R nonroot:nonroot .
+          pacman -Syu --noconfirm --needed curl jq yq
           echo "Fetch api of head commits from original repository..."
 
-          MOZC_COMMIT=$(curl -s https://api.github.com/repos/$ORIGINAL_REPO/commits/master|jq -r ".sha")
-          DEB_COMMIT=$(cat last_commit.txt)
-          echo $MOZC_COMMIT
-          echo $DEB_COMMIT
-          if [[ "$MOZC_COMMIT" == "$DEB_COMMIT" ]]; then
+          FCITX_COMMIT=$(curl -s https://api.github.com/repos/$FCITX_REPO/commits/fcitx|jq -r ".sha")
+          PKG_COMMIT=$(cat last_commit.txt)
+          echo $FCITX_COMMIT
+          echo $PKG_COMMIT
+          if [[ "$FCITX_COMMIT" == "$PKG_COMMIT" ]]; then
             echo "No changes detected. Exiting."
             echo "should_exit=true" >> $GITHUB_OUTPUT
             exit 0
@@ -55,18 +92,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          sudo chown -R nonroot:nonroot .
+          pacman -S --noconfirm --needed pacman-contrib #pkgbuild-introspection
           echo "Changes detected."
           echo
           echo "Fetching from original repository..."
-          git fetch --filter=tree:0 https://github.com/$ORIGINAL_REPO.git master
-          MOZC_COMMIT=$(git log -1 --pretty=%H FETCH_HEAD)
-          DEB_COMMIT=$(cat last_commit.txt)
-          echo $MOZC_COMMIT
-          echo $DEB_COMMIT
+          git fetch --filter=tree:0 https://github.com/$FCITX_REPO.git fcitx
+          FCITX_COMMIT=$(git log -1 --pretty=%H FETCH_HEAD)
+          PKG_COMMIT=$(cat last_commit.txt)
+          echo $FCITX_COMMIT
+          echo $PKG_COMMIT
 
           # MOZC_VERSION CHECK
           echo "Mozc version(tag) check"
-          MOZC_TAG_1="v""$(grep "^pkgver" PKGBUILD|head -n1| cut -f2 -d'=')"
+          MOZC_TAG_1="v""$(grep "^pkgver" archlinux/PKGBUILD|head -n1| cut -f2 -d'=')"
           echo "Resetting local master to FETCH_HEAD..."
           git checkout FETCH_HEAD
           source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
@@ -85,24 +124,29 @@ jobs:
 
           echo "Pushing changes to origin..."
           git checkout main
-          echo $MOZC_COMMIT > last_commit.txt
-          echo "mozc_commit=$MOZC_COMMIT" >> $GITHUB_OUTPUT
-          git commit -m "last commit is $MOZC_COMMIT" last_commit.txt
-          ./update.sh
-          git push origin main --force
-
-          TAG=commit-$MOZC_COMMIT
-          git tag $TAG
-          git push origin $TAG --force
-          echo "mozc_tag=$TAG" >> $GITHUB_OUTPUT
-
+          echo $FCITX_COMMIT > last_commit.txt
+          TAG=commit-$FCITX_COMMIT
+          echo "mozc_commit=$FCITX_COMMIT" >> $GITHUB_OUTPUT
+          #git commit -m "Fcitx5-Mozc last commit is $FCITX_COMMIT" last_commit.txt
           if [[ "$MOZC_TAG_1" != "$MOZC_TAG_2" ]];then
-            git tag $MOZC_TAG_2 $OSS_COMMIT
-            git push origin $MOZC_TAG_2 --force
+            git tag $MOZC_TAG_2 HEAD
           fi
+          chown -R nonroot:nonroot archlinux
+          chown -R nonroot:nonroot manjarolinux
+          ./update.sh archlinux
+          ./update.sh manjarolinux
+          git log -4
+          git tag $TAG HEAD
+          echo "mozc_tag=$TAG" >> $GITHUB_OUTPUT
+          git push origin main --tags
+          git push origin main
 
+  build-trigger:
+    runs-on: ubuntu-latest
+    needs: sync-master
+    steps:
       - name: Trigger release workflow
-        if: ${{ steps.sync_mozc.outputs.should_exit != 'true' }}
+        if: ${{ needs.sync-master.outputs.should_exit != 'true' }}
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +156,7 @@ jobs:
               "repo": {
                 "name": "${{ github.repository }}",
                 "branch": "main",
-                "tag": "${{ steps.check_mozc.outputs.mozc_tag }}"
+                "tag": "${{ needs.sync-master.outputs.mozc_tag }}"
               }
             }
           repository: ${{ github.repository }}
@@ -120,6 +164,7 @@ jobs:
           #  build_deb
 #    needs: sync-master
 #    strategy:
+#      mozc_tag: ${{ steps.sync-master.outputs.mozc_tag }}
 #      matrix:
 #        os: [debian-bookworm, ubuntu-lunar, ubuntu-mantic, ubuntu-noble, debian-bookworm-with-jp-dict, ubuntu-lunar-with-jp-dict, ubuntu-mantic-with-jp-dict, ubuntu-noble-with-jp-dict]
 #    runs-on: ubuntu-latest
