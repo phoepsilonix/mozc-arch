@@ -1,0 +1,322 @@
+permissions:
+  contents: write
+  actions: write
+
+name: Release
+
+on:
+  create:
+    tags:
+      - 'v*'
+      - 'commit-*'
+  repository_dispatch:
+    types: [new-tag-created]
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        os: [archlinux]
+        include:
+          - os: archlinux
+            container: archlinux:latest
+
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+        RUSTC_WRAPPER: "sccache"
+        # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment
+
+    name: Release-${{ matrix.os }}
+    steps:
+      - name: Debug event
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Event payload: ${{ toJson(github.event.client_payload) }}"
+      - name: install sudo and wget and git (Linux)
+        id: startup
+        shell: bash
+        run: |
+          echo "container_name=${{ matrix.os }}" >> $GITHUB_OUTPUT
+          pacman -Syu
+          pacman -S sudo wget git
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          set-safe-directory: 'true'
+      - name: check
+        run: |
+          export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+      - name: Setup non-root user
+        run: |
+          sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
+          sudo mkdir -p /github/workspace
+          sudo chown -R nonroot:nonroot /github/workspace
+          sudo -u nonroot whoami
+          sudo -u nonroot id
+          whoami
+          id
+      - name: Setup Mozc source for Tag
+        run: |
+          git clone --filter=tree:0 -b master https://github.com/phoepsilonix/mozc.git source
+          cd source
+          #git submodule update --init
+          git config --global --add safe.directory $PWD
+
+      - name: Setup Variables
+        id: variables
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global push.gpgSign if-asked
+          TAG=${GITHUB_REF##*/}
+          if [[ $TAG == "main" ]];then
+            echo "Running release for branch: ${{ github.event.client_payload.repo.branch }}"
+            echo "Tag: ${{ github.event.client_payload.repo.tag }}"
+            TAG="${{ github.event.client_payload.repo.tag }}"
+          fi
+          if [[ "$TAG" =~ ^commit- ]]; then
+            cd source
+            COMMIT=$(git log -1 ${TAG#commit-} --pretty=%h)
+            git checkout $COMMIT
+            echo $TAG
+            cd ..
+            #git tag $TAG -d
+            #git push origin $TAG -d
+            cd source
+            tag=$(git describe --tags --always ${COMMIT})
+            base_tag="${tag%%-*}"
+            if [[ "$tag" =~ "-" ]];then
+              after_tag="${tag#*-}"
+              echo $after_tag
+              TAG=${base_tag}"-${{ matrix.os }}-"${after_tag}
+              TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
+            else
+              after_tag=""
+              TAG=${base_tag}"-${{ matrix.os }}"
+              TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
+            fi
+            echo $TAG
+            echo $TAG2
+            echo $base_tag
+            echo $after_tag
+            TAG=${base_tag}"-${{ matrix.os }}-"${after_tag}
+            TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
+            echo $TAG
+            echo $TAG2
+            cd ..
+            git tag $TAG
+            git tag $TAG2
+            git push origin $TAG
+            git push origin $TAG2
+            echo "tag_name=" $TAG
+            echo "tag_name_2=" $TAG2
+            echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
+            echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
+            echo "tag_commit=$(git log -1 --pretty=%H ${TAG})" >> $GITHUB_OUTPUT
+          else
+            echo $TAG
+            tag=$TAG
+            base_tag="${tag%%-*}"
+            after_tag="${tag#*-${{ matrix.os }}}"
+            TAG=${base_tag}"-${{ matrix.os }}-"${after_tag}
+            TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
+            git tag $TAG
+            git tag $TAG2
+            git push origin $TAG
+            git push origin $TAG2
+            cd source
+            COMMIT=$(git log -1 --pretty=%H $base_tag$after_tag)
+            echo $COMMIT
+            git checkout $COMMIT
+            echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
+            echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
+            echo "tag_commit=$(git log -1 --pretty=%H ${COMMIT})" >> $GITHUB_OUTPUT
+          fi
+      - name: check variables
+        run: |
+          echo "${{ steps.variables.outputs.tag_name }}"
+          echo "${{ steps.variables.outputs.tag_name_2 }}"
+          echo "${{ steps.variables.outputs.tag_commit }}"
+      - name: install build tools (Linux)
+        shell: bash
+        run: |
+          sudo pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa clang ibus rustup
+      - name: Install mold linker
+        uses: rui314/setup-mold@staging
+        with:
+          mold-version: 2.34.0
+          make-default: true
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+      - name: Install bazel
+        run: |
+          mkdir -p /usr/local/bin
+          wget -qO /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-x86_64
+          sudo chmod a+x /usr/local/bin/bazel
+          bazel --version
+      - name: Build
+        shell: bash
+        run: |
+          sudo chown -R nonroot:nonroot .
+          sudo pacman -S fcitx5-qt --noconfirm
+          sudo -u nonroot makepkg -Cf -p PKGBUILD
+          sudo pacman -Rs fcitx5-qt --noconfirm
+          sudo pacman -S fcitx-qt6 --noconfirm
+          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
+          sudo pacman -Rs fcitx-qt6 --noconfirm
+          mkdir -p release
+          mv *.pkg.tar.zst release/
+      - name: Generate release note
+        id: release_note
+        shell: bash
+        run: |
+          git checkout main
+          git checkout HEAD~ -- last_commit.txt
+          OLD_COMMIT=$(cat last_commit.txt)
+          git checkout HEAD -- last_commit.txt
+          NEW_COMMIT=$(cat last_commit.txt)
+          cd source
+          if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
+            NOTE=$(git log -1)
+          else
+            #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
+            NOTE=$(git log -1)
+          fi
+          {
+          echo "release_note<<EOF"
+          echo "${NOTE}"
+          echo "EOF"
+          } >> $GITHUB_OUTPUT
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "${{ steps.variables.outputs.tag_name }}"
+          name: "${{ steps.variables.outputs.tag_name }}"
+          artifacts: 'release/*'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "${{ steps.release_note.outputs.release_note }}"
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.4
+        with:
+          version: "v0.8.2"
+      - name: Mount rustup cache
+        uses: actions/cache@v4
+        with:
+          path: "/home/runner/.rustup"
+          key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+      - name: Install Rust for -with-jp-dict
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          echo "Running Rust program for ${{ matrix.os }}"
+      - name: Added SudachiDict for -with-jp-dict
+        run: |
+          git clone --filter=tree:0 --single-branch https://github.com/phoepsilonix/mozcdict-ext.git
+          cd mozcdict-ext/sudachi
+          . "$HOME/.cargo/env"
+          _sudachidict_date=$(curl -s 'http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/' | grep -o '<td>[0-9]*</td>' | grep -o '[0-9]*' | sort -n | tail -n 1)
+          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/small_lex.zip"
+          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/core_lex.zip"
+          curl -LO "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/notcore_lex.zip"
+          unzip small_lex.zip
+          unzip core_lex.zip
+          unzip notcore_lex.zip
+          cat small_lex.csv core_lex.csv notcore_lex.csv > sudachi.csv
+          rm *lex.csv
+          rustup update stable
+          rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1)
+          cargo build --release --target $TARGET
+          ./target/$TARGET/release/dict-to-mozc -s -i ../../source/src/data/dictionary_oss/id.def -f sudachi.csv > ./all-dict.txt
+          awk -f dup.awk all-dict.txt > finish-dict.txt
+          cat finish-dict.txt |sudo tee -a ../../src/mozc/src/data/dictionary_oss/dictionary00.txt
+          rm all-dict.txt finish-dict.txt
+      - name: Build
+        shell: bash
+        run: |
+          rm -rf *zst
+          sudo pacman -S fcitx5-qt --noconfirm
+          sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
+          sudo pacman -Rs fcitx5-qt --noconfirm
+          sudo pacman -S fcitx-qt6 --noconfirm
+          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
+          sudo pacman -Rs fcitx-qt6 --noconfirm
+          mkdir -p release_2
+          mv *.pkg.tar.zst release_2/
+      - name: Generate release note
+        id: release_note_2
+        shell: bash
+        run: |
+          git checkout main
+          git checkout HEAD~ -- last_commit.txt
+          OLD_COMMIT=$(cat last_commit.txt)
+          git checkout HEAD -- last_commit.txt
+          NEW_COMMIT=$(cat last_commit.txt)
+          cd source
+          if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
+            NOTE=$(git log -1)
+          else
+           #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
+            NOTE=$(git log -1)
+          fi
+          {
+          echo "release_note<<EOF"
+          echo "Added [SudachiDict](https://github.com/WorksApplications/SudachiDict) to the system dictionary."
+          echo
+          echo "${NOTE}"
+          echo "EOF"
+          } >> $GITHUB_OUTPUT
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "${{ steps.variables.outputs.tag_name_2 }}"
+          name: "${{ steps.variables.outputs.tag_name_2 }}"
+          artifacts: 'release_2/*'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "${{ steps.release_note_2.outputs.release_note }}"
+
+
+  tag-clear:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "Masato TOYOSHIMA"
+          git config user.email phoepsilonix@phoepsilonix.love
+      - name: tag deletion
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF##*/}
+          if [[ "$TAG" == "main" ]];then
+            TAG="${{ github.event.client_payload.repo.tag }}"
+          fi
+          git push origin $TAG -d || true
+      - name: gh release delete
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --tags
+          OLD_RELEASES=$(git tag --points-at HEAD^)
+          [[ -z $OLD_RELEASES ]] && OLD_RELEASES=$(git tag --points-at HEAD^^)
+          [[ -z $OLD_RELEASES ]] && OLD_RELEASES=$(git tag --points-at HEAD^^^)
+          [[ -z $OLD_RELEASES ]] && OLD_RELEASES=$(git tag --points-at HEAD^^^^)
+          if [[ "$(echo ${OLD_RELEASES}|grep -Eo "\-([^-]*)-g[^-]*$")" != "" ]];then
+            echo ${OLD_RELEASES}
+            echo ${OLD_RELEASES} | grep -E "\-([^-]*)-g[^-]*$" | xargs -n1 gh release delete --cleanup-tag -y || true
+          fi
