@@ -2,11 +2,15 @@
 ### Build
 #### Normal
 ```sh
-makepkg -sp PKGBUILD
+sudo pacman -Rs fcitx fcitx-qt6
+makepkg -osC -p PKGBUILD
+makepkg -e -p PKGBUILD
 ```
 #### with SudachiDict
 ```
-makepkg -sp PKGBUILD.Dict
+sudo pacman -Rs fcitx fcitx-qt6
+makepkg -osC -p PKGBUILD.Dict
+makepkg -e -p PKGBUILD.Dict
 ```
 
 ```sh

@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
-      options: --init
+      options: --init --privileged
       env:
         SCCACHE_GHA_ENABLED: "true"
         RUSTC_WRAPPER: "sccache"
@@ -100,7 +100,6 @@ jobs:
         run: |
           git clone --filter=tree:0 -b master https://github.com/phoepsilonix/mozc.git source
           cd source
-          #git submodule update --init
           git config --global --add safe.directory $PWD
 
       - name: Setup Variables
@@ -176,15 +175,16 @@ jobs:
             echo "tag_commit=$(git log -1 --pretty=%H ${COMMIT})" >> $GITHUB_OUTPUT
           fi
           popd
-          SHA512SUMS=$(grep sha512sums= archlinux/PKGBUILD|sed "s|.*'\(.*\)'.*|\1|")
-          echo "fcitx5_mozc_checksum=$SHA512SUMS" >> $GITHUB_OUTPUT
+          rm -rf source
+          #SHA512SUMS=$(grep sha512sums= archlinux/PKGBUILD|sed "s|.*'\(.*\)'.*|\1|")
+          #echo "fcitx5_mozc_checksum=$SHA512SUMS" >> $GITHUB_OUTPUT
 
       - name: check variables
         run: |
           echo "${{ steps.variables.outputs.tag_name }}"
           echo "${{ steps.variables.outputs.tag_name_2 }}"
           echo "${{ steps.variables.outputs.tag_commit }}"
-          echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
+          #echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
 
       - name: install build tools (Linux)
         shell: bash
@@ -195,13 +195,13 @@ jobs:
       - name: Mount bazel cache
         uses: actions/cache@v4
         with:
-          path: "/home/runner/.cache/bazel"
-          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_checksum }}
-          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_checksum }}
+          path: "/github/workspace/.cache/bazel"
+          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
       - name: Install bazel
         run: |
           mkdir -p /usr/local/bin
-          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-x86_64
+          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64
           chmod +x /usr/local/bin/bazel
           bazel --version
       - name: Build
@@ -219,26 +219,27 @@ jobs:
           sudo -u nonroot git worktree remove tmp
           sudo -u nonroot git branch -d tmp
           cd ..
-          pacman -S fcitx5-qt --noconfirm --needed
+          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -osC --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD
           pacman -Rs fcitx5 fcitx5-qt --noconfirm
-          pacman -S fcitx-qt6 --noconfirm --needed
+          pacman -S fcitx fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
           pacman -Rs fcitx fcitx-qt6 --noconfirm
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
+          chown -R root:root ../
       - name: Generate release note
         id: release_note
         shell: bash
         run: |
-          sudo -u nonroot git checkout main
+          git checkout main
           # FCITX_COMMIT
-          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
+          git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          sudo -u nonroot git checkout HEAD -- last_commit.txt
+          git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
-          cd source
+          cd ${{ matrix.os }}/mozc/
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
             # Mozc master branch
             NOTE=$(git log -1 master)
@@ -267,7 +268,7 @@ jobs:
       - name: Mount rustup cache
         uses: actions/cache@v4
         with:
-          path: "/home/runner/.rustup"
+          path: "/github/workspace/.rustup"
           key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
           restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
       - name: Install Rust(non root) for -with-jp-dict
@@ -278,27 +279,29 @@ jobs:
       - name: Build
         shell: bash
         run: |
+          chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
           sudo -u nonroot rm -rf *pkg.tar.zst
-          pacman -S fcitx5-qt --noconfirm --needed
+          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           pacman -Rs fcitx5 fcitx5-qt --noconfirm
-          pacman -S fcitx-qt6 --noconfirm --needed
+          pacman -S fcitx fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           pacman -Rs fcitx fcitx-qt6 --noconfirm
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
+          chown -R root:root ../
       - name: Generate release note
         id: release_note_2
         shell: bash
         run: |
           git checkout main
-          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
+          git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          sudo -u nonroot git checkout HEAD -- last_commit.txt
+          git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
-          cd source
+          cd ${{ matrix.os }}/mozc
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
             NOTE=$(git log -1 master)
           else

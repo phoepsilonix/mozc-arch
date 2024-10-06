@@ -51,23 +51,17 @@ else
     echo "No change Detected."
 fi
 if [[ "$COMMIT" != "$FCITX5_MOZC_COMMIT" ]]; then
-    sudo -u nonroot sed -i 's|^_mozc_commit=.*$|_mozc_commit='"${FCITX5_MOZC_COMMIT}"'|' $1/PKGBUILD*
-    sudo -u nonroot sed -i 's|^_bcr_commit=.*$|_bcr_commit='"${BCR_COMMIT}"'|' $1/PKGBUILD*
     cd $1
-    source PKGBUILD
-    OLD_SHAS=(${sha512sums[@]})
-    sudo -u nonroot updpkgsums
-    source PKGBUILD
-    NEW_SHAS=(${sha512sums[@]})
-    i=0
-    for SHA in ${OLD_SHAS[@]};
-    do
-      echo "Before: ${SHA}"
-      echo "After: ${NEW_SHAS[$i]}"
-      echo sudo -u nonroot sed -i "s|'${SHA}'|'${NEW_SHAS[$i]}'|" PKGBUILD*
-      sudo -u nonroot sed -i "s|'${SHA}'|'${NEW_SHAS[$i]}'|" PKGBUILD*
-      i=$(($i+1))
-    done
+    sudo -u nonroot sed -i 's|^_mozc_commit=.*$|_mozc_commit='"${FCITX5_MOZC_COMMIT}"'|' PKGBUILD*
+    sudo -u nonroot sed -i 's|^_bcr_commit=.*$|_bcr_commit='"${BCR_COMMIT}"'|' PKGBUILD*
+    eval $(sudo -u nonroot makepkg -g -p PKGBUILD)
+    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD ${sha512sums[@]}
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx ${sha512sums[@]}
+    eval $(sudo -u nonroot makepkg -g -p PKGBUILD.Dict)
+    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
     cd ..
     git commit -a -m "Fcitx5-Mozc Update($1): _mozc_commit=$FCITX5_MOZC_COMMIT"
     git diff HEAD~
@@ -76,24 +70,10 @@ fi
 if [[ "$SudachiDict_DATE" != "$SUDACHI_DATE" ]];then
     sudo -u nonroot sed -i 's|^_sudachidict_date=.*$|_sudachidict_date='"${SudachiDict_DATE}"'|' $1/PKGBUILD*
     cd $1
-    cp -a PKGBUILD{,.bak}
-    cp -a PKGBUILD{.Dict,}
-    source PKGBUILD
-    OLD_SHAS=(${sha512sums[@]})
-    sudo -u nonroot updpkgsums
-    source PKGBUILD
-    cp -a PKGBUILD{,.Dict}
-    cp -a PKGBUILD{.bak,}
-    NEW_SHAS=(${sha512sums[@]})
-    i=0
-    for SHA in ${OLD_SHAS[@]};
-    do
-      echo "Before: ${SHA}"
-      echo "After: ${NEW_SHAS[$i]}"
-      echo sudo -u nonroot sed -i "s|'${SHA}'|'${NEW_SHAS[$i]}'|" PKGBUILD*
-      sudo -u nonroot sed -i "s|'${SHA}'|'${NEW_SHAS[$i]}'|" PKGBUILD*
-      i=$(($i+1))
-    done
+    eval $(sudo -u nonroot makepkg -g -p PKGBUILD.Dict)
+    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
     cd ..
     git commit -a -m "SudachiDict Update($1) _sudachidict_date=$SudachiDict_DATE"
     git diff HEAD~
