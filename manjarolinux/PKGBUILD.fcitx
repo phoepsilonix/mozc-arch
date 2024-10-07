@@ -97,7 +97,7 @@ build() {
     #bazel build --config oss_linux --compilation_mode opt unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
     bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool renderer/qt:mozc_renderer $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
   fi
-  bazel shutdown
+  #bazel shutdown
 }
 
 install_mozc-common() {

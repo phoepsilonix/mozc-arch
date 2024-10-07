@@ -21,7 +21,7 @@ jobs:
           - os: archlinux
             container: archlinux:latest
           - os: manjarolinux
-            container: docker.io/manjarolinux/build:latest
+            container: docker.io/manjarolinux/base:latest
 
     runs-on: ubuntu-latest
     container:
@@ -282,13 +282,13 @@ jobs:
           chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
           sudo -u nonroot rm -rf *pkg.tar.zst
-          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          #pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           pacman -Rs fcitx5 fcitx5-qt --noconfirm
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
-          pacman -Rs fcitx fcitx-qt6 --noconfirm
+          #pacman -Rs fcitx fcitx-qt6 --noconfirm
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
           chown -R root:root ../
