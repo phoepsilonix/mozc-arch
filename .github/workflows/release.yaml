@@ -203,7 +203,8 @@ jobs:
           mkdir -p /usr/local/bin
           curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64
           chmod +x /usr/local/bin/bazel
-          bazel --version
+          chown -R nonroot:nonroot /github/workspace/.cache
+          sudo -u nonroot bazel --version
       - name: Build
         shell: bash
         run: |
@@ -282,13 +283,13 @@ jobs:
           chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
           sudo -u nonroot rm -rf *pkg.tar.zst
-          #pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           pacman -Rs fcitx5 fcitx5-qt --noconfirm
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
-          #pacman -Rs fcitx fcitx-qt6 --noconfirm
+          pacman -Rs fcitx fcitx-qt6 --noconfirm
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
           chown -R root:root ../
