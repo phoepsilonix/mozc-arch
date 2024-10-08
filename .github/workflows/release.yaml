@@ -69,7 +69,10 @@ jobs:
         run: |
           sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
           sudo mkdir -p /github/workspace
+          sudo mkdir -p /github/workspace/.cache
+          sudo mkdir -p /github/workspace/.rustup
           sudo chown -R nonroot:nonroot /github/workspace
+          sudo chown -R nonroot:nonroot /github/workspace/*
           sudo -u nonroot whoami
           sudo -u nonroot id
           PATH=/usr/local/bin:$PATH
@@ -178,6 +181,8 @@ jobs:
           rm -rf source
           #SHA512SUMS=$(grep sha512sums= archlinux/PKGBUILD|sed "s|.*'\(.*\)'.*|\1|")
           #echo "fcitx5_mozc_checksum=$SHA512SUMS" >> $GITHUB_OUTPUT
+          PKGVER=$(grep pkgver= archlinux/PKGBUILD|head -n1|cut -f2 -d"=")
+          echo "fcitx5_mozc_pkgver=$PKGVER" >> $GITHUB_OUTPUT
 
       - name: check variables
         run: |
@@ -185,6 +190,7 @@ jobs:
           echo "${{ steps.variables.outputs.tag_name_2 }}"
           echo "${{ steps.variables.outputs.tag_commit }}"
           #echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
+          echo "${{ steps.variables.outputs.fcitx5_mozc_pkgver }}"
 
       - name: install build tools (Linux)
         shell: bash
@@ -196,8 +202,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "/github/workspace/.cache/bazel"
-          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
-          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
       - name: Install bazel
         run: |
           mkdir -p /usr/local/bin
@@ -270,8 +276,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "/github/workspace/.rustup"
-          key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
-          restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}
+          key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
       - name: Install Rust(non root) for -with-jp-dict
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
