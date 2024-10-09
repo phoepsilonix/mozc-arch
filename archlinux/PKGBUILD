@@ -11,7 +11,6 @@
 _bldtype=Release
 _mozc_commit=53f12eaaeeb14f5aa5d1ff0f1bef87245a9c3627
 _bcr_commit=f0e3787ea9fec94332eb345084b7cc052c5d3938
-_mozcdict_ext_commit=ae5f2e42e2edfeaa0e3127cf39980ea9889ddda0
 _branch=fcitx
 # Sudachi Dictionary
 _sudachidict_date=20240716
@@ -28,18 +27,13 @@ options=(!lto)
 source=("git+$url.git#commit=${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
         https://github.com/fcitx/mozc/pull/61.patch
-        git+https://github.com/phoepsilonix/mozcdict-ext.git#commit=${_mozcdict_ext_commit}
-        #"https://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip"
-        #"https://www.post.japanpost.jp/zipcode/dl/jigyosyo/zip/jigyosyo.zip"
-        # https://github.com/WorksApplications/SudachiDict
         )
 #        https://dumps.wikimedia.org/jawiki/latest/jawiki-latest-all-titles-in-ns0.gz)
 #noextract=(jawiki-latest-all-titles-in-ns0.gz)
 
 sha512sums=('4eab04915e802f949ea3b293e5397b8e6eab47eb9ab70f437c138022d0f46700baae0f2d6a4fafe8978d790126934a4808ed7d84ee52da4c097da263d6439ed5'
             'bc686f02d0fd3d65b5d40268723ec35bae89594c554c5f1c9c564da13fea8b4d79d36563be7e7a592ed605062b2a4549cb6926391af19f8066e526d17ca4ad65'
-            'a0aeb2856d62c71d0c137a687d901098eaa3371b896dbe39e54c36951cbd7d3cfba666ee96d055dba7e8c8384ed17e13597a697707cd960fac320e11f9b7b76c'
-            '359ad91d5af999de8a74041186996fe6980e1ea676be8a0e0197f3496936c03d677616dd2bd3652f3f8b4d1654f042e9e71a33faf6694cddbc1d9449532d7f3c')
+            'a0aeb2856d62c71d0c137a687d901098eaa3371b896dbe39e54c36951cbd7d3cfba666ee96d055dba7e8c8384ed17e13597a697707cd960fac320e11f9b7b76c')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit

@@ -50,23 +50,6 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
 else
     echo "No change Detected."
 fi
-if [[ "$COMMIT" != "$FCITX5_MOZC_COMMIT" ]]; then
-    cd $1
-    sudo -u nonroot sed -i 's|^_mozc_commit=.*$|_mozc_commit='"${FCITX5_MOZC_COMMIT}"'|' PKGBUILD*
-    sudo -u nonroot sed -i 's|^_bcr_commit=.*$|_bcr_commit='"${BCR_COMMIT}"'|' PKGBUILD*
-    eval $(sudo -u nonroot makepkg -g -p PKGBUILD)
-    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
-    sudo -u nonroot ../update_sha512sums.sh PKGBUILD ${sha512sums[@]}
-    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx ${sha512sums[@]}
-    eval $(sudo -u nonroot makepkg -g -p PKGBUILD.Dict)
-    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
-    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
-    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
-    cd ..
-    git commit -a -m "Fcitx5-Mozc Update($1): _mozc_commit=$FCITX5_MOZC_COMMIT"
-    git diff HEAD~
-    git log -2
-fi
 if [[ "$SudachiDict_DATE" != "$SUDACHI_DATE" ]];then
     sudo -u nonroot sed -i 's|^_sudachidict_date=.*$|_sudachidict_date='"${SudachiDict_DATE}"'|' $1/PKGBUILD*
     cd $1
@@ -76,6 +59,27 @@ if [[ "$SudachiDict_DATE" != "$SUDACHI_DATE" ]];then
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
     cd ..
     git commit -a -m "SudachiDict Update($1) _sudachidict_date=$SudachiDict_DATE"
+    git diff HEAD~
+    git log -2
+fi
+if [[ "$COMMIT" != "$FCITX5_MOZC_COMMIT" ]]; then
+    cd $1
+    sudo -u nonroot sed -i 's|^_mozc_commit=.*$|_mozc_commit='"${FCITX5_MOZC_COMMIT}"'|' PKGBUILD*
+    sudo -u nonroot sed -i 's|^_bcr_commit=.*$|_bcr_commit='"${BCR_COMMIT}"'|' PKGBUILD*
+    eval $(sudo -u nonroot makepkg -gde --noprepare -p PKGBUILD)
+    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD ${sha512sums[@]}
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx ${sha512sums[@]}
+    eval $(sudo -u nonroot makepkg -gde --noprepare -p PKGBUILD.Dict)
+    #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
+    sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
+    sudo -u nonroot makepkg -do --noprepare -p PKGBUILD
+    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.fcitx
+    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.Dict
+    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.fcitx.Dict
+    cd ..
+    git commit -a -m "Fcitx5-Mozc Update($1): _mozc_commit=$FCITX5_MOZC_COMMIT"
     git diff HEAD~
     git log -2
 fi
