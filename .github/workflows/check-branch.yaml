@@ -133,9 +133,9 @@ jobs:
           TAG=commit-$FCITX_COMMIT
           echo "mozc_commit=$FCITX_COMMIT" >> $GITHUB_OUTPUT
           #git commit -m "Fcitx5-Mozc last commit is $FCITX_COMMIT" last_commit.txt
-          if [[ "$MOZC_TAG_1" != "$MOZC_TAG_2" ]];then
-            git tag $MOZC_TAG_2 HEAD || true
-          fi
+          #if [[ "$MOZC_TAG_1" != "$MOZC_TAG_2" ]];then
+          #  git tag $MOZC_TAG_2 HEAD || true
+          #fi
           chown -R nonroot:nonroot archlinux
           chown -R nonroot:nonroot manjarolinux
           ./update.sh archlinux
