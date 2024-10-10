@@ -22,14 +22,12 @@ pkgrel=1
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
-makedepends=('qt6-base' 'fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'python-six' 'pkg-config' 'curl' 'mesa' 'clang' 'ibus')
+makedepends=('fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'libibus')
 options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
         https://github.com/fcitx/mozc/pull/61.patch
         )
-#        https://dumps.wikimedia.org/jawiki/latest/jawiki-latest-all-titles-in-ns0.gz)
-#noextract=(jawiki-latest-all-titles-in-ns0.gz)
 
 sha512sums=('20335ac48f9719143e9c647613a3a8da4e5110bf367d9333f9389f1a456c7340e179a790eec2dadc63f7b428fdd7d52778bd522b809ddd77da49b4d8c0360b55'
             'cbff7e417918d9827ac7399bdf8389bc9eb862db52785fd35a4e4dea210c13925b6ca0b3b5a9079fd14bb0f9e0342f6c097c6934fbf7f1d71a3d044aa6a88ff0'
@@ -56,9 +54,8 @@ prepare() {
   # nm -f posix (llvm-nm -f posix)
   sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
 
-  # mozc date and version
-  #_date=$(git log -1 --pretty=format:'%as' $_mozc_commit)
-  #sed -i -e "/2.25.4150.102.1/d"  -e "s/2.26.4220.106.1/${pkgver}.${pkgrel}/" -e "s/2021-01-16/${_date}/" src/unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in
+  # disable warning of ANDROID_NDK_HOME.
+  sed -e '/register_toolchains("@androidndk\/\/:all")/d' -i MODULE.bazel
 }
 
 build() {
@@ -68,68 +65,71 @@ build() {
   CFLAGS="${CFLAGS} -fvisibility=hidden"
   CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
-  # fcitx
-  #GYP_DEFINES="use_fcitx=YES use_fcitx5=0 use_libibus=0" ../scripts/configure
-  #TARGETS="unix/fcitx/fcitx.gyp:fcitx-mozc"
-  #python build_mozc.py build ${TARGETS} -c ${_bldtype}
-
   BAZEL_COPTS=""
   BAZEL_CXXOPTS=""
   for f in $CFLAGS;do ([[ ! $f =~ _FORTIFY_SOURCE ]]) && BAZEL_COPTS+=" --copt $f";done
   for f in $CXXFLAGS;do ([[ ! $f =~ _FORTIFY_SOURCE ]]) && BAZEL_CXXOPTS+=" --cxxopt $f";done
   BAZEL_LDOPTS=$(echo $LDFLAGS | xargs -n1 echo "--linkopt")
-  #BAZEL_COPTS=$(echo $CFLAGS | xargs -n1 echo "--copt")
-  #BAZEL_CXXOPTS=$(echo $CXXFLAGS | xargs -n1 echo "--cxxopt")
 
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge
 
-  if [[ $CC =~ gcc ]];then
-    #bazel build --config oss_linux --compilation_mode opt unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized
-    bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool renderer/qt:mozc_renderer --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized
-  else
-    #bazel build --config oss_linux --compilation_mode opt unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
-    bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool renderer/qt:mozc_renderer $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
-  fi
-  #bazel shutdown
+  bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
+  bazel shutdown
 }
 
 install_mozc-common() {
+  cd ${srcdir}/mozc/src || exit
   export PREFIX="$pkgdir/usr"
   export _bldtype
-  cd mozc/src || exit
 
-  # Extract license part of mozc
-  head -n 29 server/mozc_server.cc > LICENSE
+  install -d "$pkgdir/usr/share/licenses/$pkgname/"
+  # Unicode-3.0
   head -n 50 data/unicode/JIS0201.TXT > LICENSE.JIS0201
   head -n 73 data/unicode/JIS0208.TXT > LICENSE.JIS0208
   head -n 22 data/unicode/jisx0213-2004-std.txt > LICENSE.jisx0213-2004-std
 
-  install -d "$pkgdir/usr/share/licenses/$pkgname/"
-  install -m 644 LICENSE LICENSE.* data/installer/*.html "$pkgdir/usr/share/licenses/$pkgname/"
-  install -D -m 644 data/dictionary_oss/README.txt "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/LICENSE"
-  install -D -m 644 third_party/abseil-cpp/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/abseil-cpp/LICENSE"
-  install -D -m 644 third_party/breakpad/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/breakpad/LICENSE"
-  install -D -m 644 third_party/gtest/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/gtest/LICENSE"
-  install -D -m 644 third_party/gyp/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/gyp/LICENSE"
-  #install -D -m 644 third_party/ipa_font/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/ipa_font/LICENSE"
-  install -D -m 644 third_party/japanese_usage_dictionary/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/japanese_usage_dictionary/LICENSE"
-  install -D -m 644 third_party/protobuf/third_party/jsoncpp/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/jsoncpp/LICENSE"
-  install -D -m 644 third_party/protobuf/LICENSE "$pkgdir/usr/share/licenses/$pkgname/third_party/prptobuf/LICENSE"
-  #for dict in "${_dict[@]}"; do
-  #  install -D -m 644 "$srcdir/LICENSE-${dict}" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
-  #done
-  ../scripts/install_server_bazel
+  # BSD-3-Clause
+  sed -n 1,29p unix/fcitx5/fcitx_key_translator.h > Fcitx5
+  sed -i -e 's|^\/\/[ ]\?||g' Fcitx5
+  install -Dm644 Fcitx5 "${pkgdir}"/usr/share/licenses/${pkgname}/Fcitx5
+  # BSD-3-Clause
+  sed -n 67,94p data/installer/credits_en.html > Mozc
+  install -Dm644 Mozc "${pkgdir}"/usr/share/licenses/${pkgname}/Mozc
+  # BSD-3-Clause
+  sed -n 317,344p data/installer/credits_en.html > Breakpad
+  install -Dm644 Breakpad "${pkgdir}"/usr/share/licenses/${pkgname}/Breakpad
+  # NAIST-2003
+  sed -n 355,424p data/installer/credits_en.html > IPAdic
+  install -Dm644 IPAdic "${pkgdir}"/usr/share/licenses/${pkgname}/IPAdic
+  # BSD-2-Clause
+  sed -n 435,457p data/installer/credits_en.html > Japanese-Usage-Dictionary
+  install -Dm644 Japanese-Usage-Dictionary "${pkgdir}"/usr/share/licenses/${pkgname}/Japanese-Usage-Dictionary
+  # Public Domain Data
+  sed -n 468,470p data/installer/credits_en.html > Okinawa-Dictionary
+  install -Dm644 Okinawa-Dictionary "${pkgdir}"/usr/share/licenses/${pkgname}/Okinawa-Dictionary
+  # BSD-3-Clause
+  sed -n 481,513p data/installer/credits_en.html > Protocol-Buffers
+  install -Dm644 Protocol-Buffers "${pkgdir}"/usr/share/licenses/${pkgname}/Protocol-Buffers
+  # MIT
+  sed -n 698,704p data/installer/credits_en.html > Tamachi-Phonetic-Kanji-Alphabet
+  install -Dm644 Tamachi-Phonetic-Kanji-Alphabet "${pkgdir}"/usr/share/licenses/${pkgname}/Tamachi-Phonetic-Kanji-Alphabet
+  # MIT
+  sed -n 762,782p data/installer/credits_en.html > Windows-Implementation-Library
+  sed -i -e 's|^[ \t]*||g' Windows-Implementation-Library
+  install -Dm644 Windows-Implementation-Library "${pkgdir}"/usr/share/licenses/${pkgname}/Windows-Implementation-Library
 }
 
 package_fcitx-mozc() {
   pkgdesc="Fcitx module for Mozc with SudachiDict dictionary"
-  depends=('fcitx' fcitx-qt6 gcc-libs glibc qt6-base)
+  depends=('fcitx' 'fcitx-qt6')
+  optdepends=('fcitx-configtool')
   provides=('fcitx-mozc')
-  replaces=('fcitx-mozc' "${pkgbase}-common")
-  conflicts=('fcitx-mozc' 'fcitx5-mozc' "${pkgbase}-common" 'ibus-mozc' ibus-mozc-with-jp-dict fcitx5-mozc-with-jp-dict fcitx5 fcitx5-qt fcitx5-configtool)
+  replaces=('fcitx-mozc')
+  conflicts=('fcitx-mozc' 'fcitx5-mozc' 'ibus-mozc')
 
   install_mozc-common
+  ../scripts/install_server_bazel
   export PREFIX="$pkgdir/usr"
   export _bldtype
   cd ${srcdir}/mozc/src || exit
@@ -160,9 +160,5 @@ package_fcitx-mozc() {
   install -D -m 644 ../scripts/icons/ui-dictionary.png "${PREFIX}/share/fcitx/mozc/icon/mozc-dictionary.png"
   install -D -m 644 ../scripts/icons/ui-properties.png "${PREFIX}/share/fcitx/mozc/icon/mozc-properties.png"
   install -D -m 644 ../scripts/icons/ui-tool.png "${PREFIX}/share/fcitx/mozc/icon/mozc-tool.png"
-
-  install -d "$pkgdir/usr/share/licenses/$pkgname/"
-  install -m 644 LICENSE data/installer/*.html "$pkgdir/usr/share/licenses/$pkgname/"
-  install -D -m 755 bazel-bin/renderer/qt/mozc_renderer      "${pkgdir}/usr/lib/mozc/mozc_renderer"
 }
 
