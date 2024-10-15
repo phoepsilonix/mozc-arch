@@ -161,6 +161,7 @@ jobs:
             echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
             echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
             echo "tag_commit=$(git log -1 --pretty=%H ${TAG})" >> $GITHUB_OUTPUT
+            echo "base_tag=${base_tag}" >> $GITHUB_OUTPUT
           else
             echo $TAG
             tag=$TAG
@@ -181,6 +182,7 @@ jobs:
             echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
             echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
             echo "tag_commit=$(git log -1 --pretty=%H ${COMMIT})" >> $GITHUB_OUTPUT
+            echo "base_tag=${base_tag}" >> $GITHUB_OUTPUT
           fi
           popd
           rm -rf source
@@ -194,6 +196,7 @@ jobs:
           echo "${{ steps.variables.outputs.tag_name }}"
           echo "${{ steps.variables.outputs.tag_name_2 }}"
           echo "${{ steps.variables.outputs.tag_commit }}"
+          echo "${{ steps.variables.outputs.base_tag }}"
           #echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
           echo "${{ steps.variables.outputs.fcitx5_mozc_pkgver }}"
 
@@ -203,12 +206,7 @@ jobs:
           pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa llvm clang ibus bazel rustup mold --noconfirm --needed
           curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.34.1/mold-2.34.1-x86_64-linux.tar.gz
           tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
-      - name: Mount bazel cache
-        uses: actions/cache@v4
-        with:
-          path: "/github/workspace/.cache/bazel"
-          key: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
-          restore-keys: bazel-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+
       - name: Install bazel
         run: |
           mkdir -p /usr/local/bin
@@ -216,6 +214,16 @@ jobs:
           chmod +x /usr/local/bin/bazel
           chown -R nonroot:nonroot /github/workspace/.cache
           sudo -u nonroot bazel --version
+
+      - name: Bazel Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /github/workspace/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-${{ steps.startup.outputs.container_name }}-
+
       - name: Build
         shell: bash
         run: |
