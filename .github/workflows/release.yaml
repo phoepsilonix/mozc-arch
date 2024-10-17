@@ -69,9 +69,9 @@ jobs:
         run: |
           sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
           sudo mkdir -p /github/workspace
-          sudo chown -R nonroot:nonroot /github/workspace
           sudo mkdir -p /github/workspace/.cache
           sudo mkdir -p /github/workspace/.rustup
+          sudo mkdir -p /github/workspace/.cargo
           sudo chown -R nonroot:nonroot /github/workspace
           sudo -u nonroot whoami
           sudo -u nonroot id
@@ -220,9 +220,9 @@ jobs:
         with:
           path: |
             /github/workspace/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
           restore-keys: |
-            ${{ runner.os }}-bazel-${{ steps.startup.outputs.container_name }}-
+            ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-
 
       - name: Build
         shell: bash
@@ -288,9 +288,11 @@ jobs:
       - name: Mount rustup cache
         uses: actions/cache@v4
         with:
-          path: "/github/workspace/.rustup"
-          key: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
-          restore-keys: rustup-${{ runner.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          path: |
+            /github/workspace/.rustup
+            /github/workspace/.cargo
+          key: rustup-${{ matrix.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          restore-keys: rustup-${{ matrix.os }}-mozc-${{ steps.startup.outputs.container_name }}-
       - name: Install Rust(non root) for -with-jp-dict
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
