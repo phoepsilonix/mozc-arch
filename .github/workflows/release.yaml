@@ -21,7 +21,7 @@ jobs:
           - os: archlinux
             container: archlinux:latest
           - os: manjarolinux
-            container: docker.io/manjarolinux/base:latest
+            container: docker.io/manjarolinux/build:latest
 
     runs-on: ubuntu-latest
     container:
@@ -45,6 +45,17 @@ jobs:
           echo "container_name=${{ matrix.os }}" >> $GITHUB_OUTPUT
           pacman -Syu --noconfirm --needed
           pacman -S sudo git --noconfirm --needed
+      - name: manjaro_jp
+        if: matrix.os == 'manjarolinux'
+        run: |
+          (echo ;cat manjaro_jp.txt) | tee -a /etc/pacman.conf
+          pacman -S curl htmlq --needed --noconfirm
+          KEYRING=$(curl -s https://manjaro-jp.phoepsilonix.love/manjaro-jp/|htmlq 'a[href^="manjaro_jp"][href$=".zst"]' --attribute href)
+          curl -LO https://manjaro-jp.phoepsilonix.love/manjaro-jp/$KEYRING
+          pacman -U $KEYRING --noconfirm
+          pacman-key --populate
+          pacman -Syu --noconfirm --needed
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0

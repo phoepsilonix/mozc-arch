@@ -1,0 +1,3 @@
+[manjaro-jp]
+SigLevel = PackageRequired
+Server = https://manjaro-jp.phoepsilonix.love/manjaro-jp/
