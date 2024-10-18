@@ -26,12 +26,12 @@ makedepends=('fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'libibus')
 options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
-        https://github.com/fcitx/mozc/pull/61.patch
+        https://github.com/fcitx/mozc/pull/65.patch
         )
 
 sha512sums=('2cc3f89a98ab646627cc01743e62af435f2346f9ebda0b38d401f8821415de8992d34e4c4c8f66ad343359713382ddba051d2ab54ee3cb41dd3f5cae658187e2'
             '29b649fde32582527657e38dc7a2974a1f22ad56c4e69be169f77cd1afcd969877027209d13728eea9882a42549b006caf0c5736a5c4305244e8baacce786c3b'
-            'a0aeb2856d62c71d0c137a687d901098eaa3371b896dbe39e54c36951cbd7d3cfba666ee96d055dba7e8c8384ed17e13597a697707cd960fac320e11f9b7b76c')
+            '08fded5b3696a4ebdfc45ec188ab6d06c9dfbe62ca3df8b1cbc086e869977f9c937e92470d496e8a68cb59ca08eff285ab6af6f8cd42c04c410a713241d2fd6d')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -44,7 +44,7 @@ prepare() {
   git submodule update --init --recursive
 
   # PR(pull request)
-  patch -p1 -i ${srcdir}/61.patch
+  patch -p1 -i ${srcdir}/65.patch
 
   cd src || exit
 
@@ -130,35 +130,6 @@ package_fcitx-mozc() {
 
   install_mozc-common
   ../scripts/install_server_bazel
-  export PREFIX="$pkgdir/usr"
-  export _bldtype
-  cd ${srcdir}/mozc/src || exit
-
-  for pofile in unix/fcitx/po/*.po
-  do
-    filename=`basename $pofile`
-    lang=${filename/.po/}
-    mofile=${pofile/.po/.mo}
-    msgfmt $pofile -o $mofile
-    install -D -m 644 "$mofile" "${PREFIX}/share/locale/$lang/LC_MESSAGES/fcitx-mozc.mo"
-    rm -f $mofile
-  done
-
-  #install -D -m 755 "out_linux/${_bldtype}/fcitx-mozc.so" "${PREFIX}/lib/fcitx/fcitx-mozc.so"
-  install -D -m 755 "bazel-bin/unix/fcitx/fcitx-mozc.so" "${PREFIX}/lib/fcitx/fcitx-mozc.so"
-  install -D -m 644 unix/fcitx/fcitx-mozc.conf "${PREFIX}/share/fcitx/addon/fcitx-mozc.conf"
-  install -D -m 644 unix/fcitx/mozc.conf "${PREFIX}/share/fcitx/inputmethod/mozc.conf"
-
-  install -d "${PREFIX}/share/fcitx/mozc/icon"
-  install -D -m 644 data/images/product_icon_32bpp-128.png "${PREFIX}/share/fcitx/mozc/icon/mozc.png"
-  install -D -m 644 ../scripts/icons/ui-alpha_full.png "${PREFIX}/share/fcitx/mozc/icon/mozc-alpha_full.png"
-  install -D -m 644 ../scripts/icons/ui-alpha_half.png "${PREFIX}/share/fcitx/mozc/icon/mozc-alpha_half.png"
-  install -D -m 644 ../scripts/icons/ui-direct.png "${PREFIX}/share/fcitx/mozc/icon/mozc-direct.png"
-  install -D -m 644 ../scripts/icons/ui-hiragana.png "${PREFIX}/share/fcitx/mozc/icon/mozc-hiragana.png"
-  install -D -m 644 ../scripts/icons/ui-katakana_full.png "${PREFIX}/share/fcitx/mozc/icon/mozc-katakana_full.png"
-  install -D -m 644 ../scripts/icons/ui-katakana_half.png "${PREFIX}/share/fcitx/mozc/icon/mozc-katakana_half.png"
-  install -D -m 644 ../scripts/icons/ui-dictionary.png "${PREFIX}/share/fcitx/mozc/icon/mozc-dictionary.png"
-  install -D -m 644 ../scripts/icons/ui-properties.png "${PREFIX}/share/fcitx/mozc/icon/mozc-properties.png"
-  install -D -m 644 ../scripts/icons/ui-tool.png "${PREFIX}/share/fcitx/mozc/icon/mozc-tool.png"
+  ../scripts/install_fcitx_bazel
 }
 
