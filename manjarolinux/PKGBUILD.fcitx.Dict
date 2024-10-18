@@ -36,10 +36,10 @@ source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "LICENSE-SudachiDict::https://github.com/WorksApplications/SudachiDict/raw/develop/LEGAL"
         # Neologd-unidic https://github.com/neologd/mecab-ipadic-neologd
         https://github.com/phoepsilonix/mecab-unidic-neologd/raw/refs/heads/master/seed/mecab-unidic-user-dict-seed.20200910.csv.xz
-        LICENSE-mecab-unidic-neologd::https://github.com/phoepsilonix/mecab-unidic-neologd/raw/refs/heads/master/COPYING
+        LICENSE-MeCab-unidic-Neologd::https://github.com/phoepsilonix/mecab-unidic-neologd/raw/refs/heads/master/COPYING
         # Neologd-ipadic https://github.com/neologd/mecab-ipadic-neologd
         https://github.com/phoepsilonix/mecab-ipadic-neologd/raw/refs/heads/master/seed/mecab-user-dict-seed.20200910.csv.xz
-        LICENSE-mecab-ipadic-neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
+        LICENSE-MeCab-ipadic-Neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
         )
 
 sha512sums=('2cc3f89a98ab646627cc01743e62af435f2346f9ebda0b38d401f8821415de8992d34e4c4c8f66ad343359713382ddba051d2ab54ee3cb41dd3f5cae658187e2'
@@ -92,9 +92,9 @@ prepare() {
   cat ${srcdir}/small_lex.csv ${srcdir}/core_lex.csv ${srcdir}/notcore_lex.csv > all.csv
   cp ${srcdir}/mozc/src/data/dictionary_oss/id.def ./
   ./target/$TARGET/release/dict-to-mozc -s -i ./id.def -f all.csv >> all-dict.txt
-  msg '3. Convert Mecab-unidic-neologd to Mozc System Dictionary format. It may take some time...'
+  msg '3. Convert MeCab-unidic-Neologd to Mozc System Dictionary format. It may take some time...'
   ./target/$TARGET/release/dict-to-mozc -n -i ./id.def -f ${srcdir}/mecab-unidic-user-dict-seed.20200910.csv >> all-dict.txt
-  msg '4. Convert Mecab-ipadic-neologd to Mozc System Dictionary format. It may take some time...'
+  msg '4. Convert MeCab-ipadic-Neologd to Mozc System Dictionary format. It may take some time...'
   ./target/$TARGET/release/dict-to-mozc -n -P 12 -N 10 -i ./id.def -f ${srcdir}/mecab-user-dict-seed.20200910.csv >> all-dict.txt
   msg '5. Duplicate data will be removed.'
   # 読み、品詞ID、右品詞ID、表記による重複チェック
@@ -171,12 +171,12 @@ install_mozc-with-jp-dict-common() {
 
   install -d "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
   install -D -m 644 "$srcdir/LICENSE-SudachiDict" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
-  install -D -m 644 "$srcdir/LICENSE-mecab-unidic-neologd" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
-  install -D -m 644 "$srcdir/LICENSE-mecab-ipadic-neologd" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
+  install -D -m 644 "$srcdir/LICENSE-MeCab-unidic-Neologd" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
+  install -D -m 644 "$srcdir/LICENSE-MeCab-ipadic-Neologd" "$pkgdir/usr/share/licenses/$pkgname/data/dictionary_oss/"
 }
 
 package_fcitx-mozc-with-jp-dict() {
-  pkgdesc="Fcitx Module for Mozc(the Open Source Edition of Google Japanese Input) with SudachiDict and MeCab UniDic Neologd and Mecab IpaDic Neologd"
+  pkgdesc="Fcitx Module for Mozc(the Open Source Edition of Google Japanese Input) with SudachiDict and MeCab UniDic Neologd and MeCab IpaDic Neologd"
   depends=('fcitx' 'fcitx-qt6')
   optdepends=('fcitx-configtool')
   provides=('fcitx-mozc')
