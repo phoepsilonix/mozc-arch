@@ -11,7 +11,7 @@
 _bldtype=Release
 _mozc_commit=815cc6669489fd87c4235fc25245c8d230dad3b2
 _bcr_commit=266b6469810e7a668aaac144fdd0a39f4ef0189f
-_dict_to_mozc_commit=a78381248ae539db22f62ca0af6c10b9035e5dab
+_dict_to_mozc_commit=d736d8c7d4a7a75e9b23b50f7a5c6d4e188d24f7
 _branch=fcitx
 # Sudachi Dictionary
 _sudachidict_date=20240716
@@ -82,7 +82,7 @@ prepare() {
   rustup update stable
 
   cd "${srcdir}/dict-to-mozc/" || exit
-  msg '1. Build the rust program(mozcdict-ext), it may take some time...'
+  msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
   unset RUSTC
   cargo build --release --target $TARGET
