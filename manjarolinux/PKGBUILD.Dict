@@ -27,7 +27,6 @@ makedepends=('qt6-base' 'fcitx5' 'fcitx5-qt' 'bazel' 'git' 'python' 'python-six'
 options=(!lto)
 source=("git+$url.git#commit=${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
-        https://github.com/fcitx/mozc/pull/61.patch
         git+https://github.com/phoepsilonix/dict-to-mozc.git#commit=${_dict_to_mozc_commit}
         # https://github.com/WorksApplications/SudachiDict
         "http://sudachi.s3-website-ap-northeast-1.amazonaws.com/sudachidict-raw/${_sudachidict_date}/small_lex.zip"
@@ -44,7 +43,6 @@ source=("git+$url.git#commit=${_mozc_commit}"
 
 sha512sums=('2cc3f89a98ab646627cc01743e62af435f2346f9ebda0b38d401f8821415de8992d34e4c4c8f66ad343359713382ddba051d2ab54ee3cb41dd3f5cae658187e2'
             '29b649fde32582527657e38dc7a2974a1f22ad56c4e69be169f77cd1afcd969877027209d13728eea9882a42549b006caf0c5736a5c4305244e8baacce786c3b'
-            'a0aeb2856d62c71d0c137a687d901098eaa3371b896dbe39e54c36951cbd7d3cfba666ee96d055dba7e8c8384ed17e13597a697707cd960fac320e11f9b7b76c'
             'dd015c0e578bccc715d19e1a6346dd115b430874e410b5357c7754a277942f58f627228f86c55209402898524a6b8722cbecab92e98469b975be1e59b6be3122'
             '9428d55d2d9603c8bfcd12cc0184415f23af1d09a2d0ebdf0cce694a09638e7cfe0c1241bf1c943427b2fccfea619ca8b2e22db3452d837b416eb31aa224e766'
             'f0a3544dcc99bf8c4cea8ebfd31af827e209f0678997ab55f6eda54f34cad5e148d1bd156417a621665c2068e7371801dc9cf1baa34f2270a99da7055f46d95d'
@@ -64,9 +62,6 @@ pkgver() {
 prepare() {
   cd "$srcdir/mozc" || exit
   git submodule update --init --recursive
-
-  # PR(pull request)
-  patch -p1 -i ${srcdir}/61.patch
 
   cd src || exit
 
