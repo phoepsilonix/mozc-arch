@@ -69,15 +69,13 @@ if [[ "$COMMIT" != "$FCITX5_MOZC_COMMIT" ]]; then
     eval $(sudo -u nonroot makepkg -gde --noprepare -p PKGBUILD)
     #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD ${sha512sums[@]}
+    eval $(sudo -u nonroot makepkg -gdoe --noprepare -p PKGBUILD.fcitx)
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx ${sha512sums[@]}
-    eval $(sudo -u nonroot makepkg -gde --noprepare -p PKGBUILD.Dict)
+    eval $(sudo -u nonroot makepkg -gdoe --noprepare -p PKGBUILD.Dict)
     #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
+    eval $(sudo -u nonroot makepkg -gdoe --noprepare -p PKGBUILD.fcitx.Dict)
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
-    sudo -u nonroot makepkg -do --noprepare -p PKGBUILD
-    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.fcitx
-    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.Dict
-    sudo -u nonroot makepkg -doe --noprepare -p PKGBUILD.fcitx.Dict
     cd ..
     git commit -a -m "Fcitx5-Mozc Update($1): _mozc_commit=$FCITX5_MOZC_COMMIT"
     git diff HEAD~
