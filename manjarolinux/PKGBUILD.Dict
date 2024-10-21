@@ -9,8 +9,8 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=815cc6669489fd87c4235fc25245c8d230dad3b2
-_bcr_commit=266b6469810e7a668aaac144fdd0a39f4ef0189f
+_mozc_commit=1dcab4b269a6dffb6d17ec5fc76c85f10ebbd86d
+_bcr_commit=fdd364f43e3afb8b4d5d70d150ec146722890051
 _dict_to_mozc_commit=d736d8c7d4a7a75e9b23b50f7a5c6d4e188d24f7
 _branch=fcitx
 # Sudachi Dictionary
@@ -19,7 +19,7 @@ _sudachidict_date=20240716
 pkgbase=mozc-with-jp-dict
 pkgname=("ibus-$pkgbase" "fcitx5-$pkgbase" "emacs-$pkgbase")
 pkgver=2.30.5618.102
-pkgrel=3
+pkgrel=4
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
@@ -41,9 +41,9 @@ source=("git+$url.git#commit=${_mozc_commit}"
         LICENSE-MeCab-ipadic-Neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
         )
 
-sha512sums=('2cc3f89a98ab646627cc01743e62af435f2346f9ebda0b38d401f8821415de8992d34e4c4c8f66ad343359713382ddba051d2ab54ee3cb41dd3f5cae658187e2'
-            '29b649fde32582527657e38dc7a2974a1f22ad56c4e69be169f77cd1afcd969877027209d13728eea9882a42549b006caf0c5736a5c4305244e8baacce786c3b'
-            'dd015c0e578bccc715d19e1a6346dd115b430874e410b5357c7754a277942f58f627228f86c55209402898524a6b8722cbecab92e98469b975be1e59b6be3122'
+sha512sums=('394ab6702f3677018993b3cfdc692902f63cbc08d4f4036f24a71de4b72d2028cd5fae20e26618bffe44ca2bf2d82a99370bf1f19c2f3655ccc489ec3b967c5a'
+            '20dbfae2051342d81e8c41f47a69b7da9859049af6f6d0be2647911af421d484c6d94bffaba98258c6208ca85d8664e26cce933fb8e79dd09968336052094fc5'
+            '0ce54cc35f532e9d963aadaf98bcac1338b0a7d58db3c840cf84ddccd70c19c963ff4dafe39d8822eab1887a893867ac7622c4a543ad34c170540ecf4ed07bf6'
             '9428d55d2d9603c8bfcd12cc0184415f23af1d09a2d0ebdf0cce694a09638e7cfe0c1241bf1c943427b2fccfea619ca8b2e22db3452d837b416eb31aa224e766'
             'f0a3544dcc99bf8c4cea8ebfd31af827e209f0678997ab55f6eda54f34cad5e148d1bd156417a621665c2068e7371801dc9cf1baa34f2270a99da7055f46d95d'
             '5551cbf4da52bc2eb73841013f98634ac8fcb56e5f6e163c9e640d5b9eaa4eafc2fa72cc20660db012ebdb438f835c2098b77c02c483d3244df901748e3d30fa'
