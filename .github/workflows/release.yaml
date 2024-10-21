@@ -29,8 +29,6 @@ jobs:
       options: --init --privileged
       env:
         SCCACHE_GHA_ENABLED: "true"
-        RUSTC_WRAPPER: "sccache"
-        # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment
 
     name: Release-${{ matrix.os }}
     steps:
@@ -215,7 +213,7 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          pacman -S base-devel fakeroot qt6-base fcitx5 fcitx5-qt python python-six pkg-config curl mesa llvm clang ibus bazel rustup mold --noconfirm --needed
+          pacman -S base-devel fakeroot qt6-base python python-six pkg-config curl mesa llvm clang ibus bazel rustup mold sccache --noconfirm --needed
           curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.34.1/mold-2.34.1-x86_64-linux.tar.gz
           tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
 
@@ -293,16 +291,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: "${{ steps.release_note.outputs.release_note }}"
 
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.4
-        with:
-          version: "v0.8.2"
       - name: Mount rustup cache
         uses: actions/cache@v4
         with:
           path: |
             /github/workspace/.rustup
             /github/workspace/.cargo
+            /github/workspace/.cache/sccache
           key: rustup-${{ matrix.os }}-mozc-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
           restore-keys: rustup-${{ matrix.os }}-mozc-${{ steps.startup.outputs.container_name }}-
       - name: Install Rust(non root) for -with-jp-dict
