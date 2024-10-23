@@ -12,8 +12,6 @@ _bldtype=Release
 _mozc_commit=667bdf8963d0035c541b62fe59590f52d225fa67
 _bcr_commit=86a25f730aacfdeefd4d1e671dff5b5ee17c34bb
 _branch=fcitx
-# Sudachi Dictionary
-_sudachidict_date=20241021
 
 pkgbase=mozc
 pkgname=("fcitx-$pkgbase")
