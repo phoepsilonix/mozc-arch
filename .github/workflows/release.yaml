@@ -143,6 +143,8 @@ jobs:
             base_tag="${tag%%-*}"
             if [[ "$tag" =~ "-" ]];then
               after_tag="${tag#*-}"
+              FCITX_COMMIT=$(git rev-parse --short ${TAG#commit-})
+              after_tag="${after_tag%-*}"-g${FCITX_COMMIT}
               echo $after_tag
               TAG=${base_tag}"-${{ matrix.os }}-"${after_tag}
               TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
@@ -199,7 +201,9 @@ jobs:
           #SHA512SUMS=$(grep sha512sums= archlinux/PKGBUILD|sed "s|.*'\(.*\)'.*|\1|")
           #echo "fcitx5_mozc_checksum=$SHA512SUMS" >> $GITHUB_OUTPUT
           PKGVER=$(grep pkgver= archlinux/PKGBUILD|head -n1|cut -f2 -d"=")
+          PKGREL=$(grep pkgrel= archlinux/PKGBUILD|head -n1|cut -f2 -d"=")
           echo "fcitx5_mozc_pkgver=$PKGVER" >> $GITHUB_OUTPUT
+          echo "fcitx5_mozc_pkgrel=$PKGREL" >> $GITHUB_OUTPUT
 
       - name: check variables
         run: |
@@ -209,6 +213,7 @@ jobs:
           echo "${{ steps.variables.outputs.base_tag }}"
           #echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
           echo "${{ steps.variables.outputs.fcitx5_mozc_pkgver }}"
+          echo "${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}"
 
       - name: install build tools (Linux)
         shell: bash
@@ -230,8 +235,10 @@ jobs:
         with:
           path: |
             /github/workspace/.cache/bazel
-          key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}
+          key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
           restore-keys: |
+            ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
+            ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-
 
       - name: Build
