@@ -13,12 +13,12 @@ _mozc_commit=1b32a4ddb85109687faf30f7437dc1b7dff7d43a
 _bcr_commit=fdd364f43e3afb8b4d5d70d150ec146722890051
 _branch=fcitx
 # Sudachi Dictionary
-_sudachidict_date=20240716
+_sudachidict_date=20241021
 
 pkgbase=mozc
 pkgname=("ibus-$pkgbase" "fcitx5-$pkgbase" "emacs-$pkgbase")
 pkgver=2.30.5618.102
-pkgrel=5
+pkgrel=6
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
