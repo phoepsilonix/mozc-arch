@@ -24,10 +24,12 @@ makedepends=('fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'libibus')
 options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
+        https://github.com/fcitx/mozc/pull/68.patch
         )
 
 sha512sums=('388e5e1331cb3325f2c46a022244df9d0160ed531f5de3fe39394383367ec770ae40c6f00099dc3ea67dd3108c00ae16a9bf56f97cb4893cd2767e3370d93735'
-            'c01cae8e5b013f6b9ac693ec7fac54c21ee3cbd86cfa3e7c328fd4c9d3df23f30634b2df1d041b829a3a52efa51f6f8c75ecd8b6ba989cf66cfbc8e3c53162af')
+            'c01cae8e5b013f6b9ac693ec7fac54c21ee3cbd86cfa3e7c328fd4c9d3df23f30634b2df1d041b829a3a52efa51f6f8c75ecd8b6ba989cf66cfbc8e3c53162af'
+            'f574032231337059fdd8046e988b1ad580191b07baa43fd3f9e4c2d4ab70b9bf4b97643a8d7c9143089a7292f8a0154cc17d025714502ce3edd7b168936dbca8')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -38,6 +40,9 @@ pkgver() {
 prepare() {
   cd "$srcdir/mozc" || exit
   git submodule update --init --recursive
+
+  # PR 68
+  patch -p1 -i ${srcdir}/68.patch
 
   cd src || exit
 
