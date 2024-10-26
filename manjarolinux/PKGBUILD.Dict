@@ -9,8 +9,8 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=667bdf8963d0035c541b62fe59590f52d225fa67
-_bcr_commit=86a25f730aacfdeefd4d1e671dff5b5ee17c34bb
+_mozc_commit=3db6e34452a4e230b8548a69b6d76548eec90bae
+_bcr_commit=4f4bad8f463685498cf9e0a4ba45ffe9e290a853
 _dict_to_mozc_commit=d736d8c7d4a7a75e9b23b50f7a5c6d4e188d24f7
 _branch=fcitx
 # Sudachi Dictionary
@@ -41,8 +41,8 @@ source=("git+$url.git#commit=${_mozc_commit}"
         LICENSE-MeCab-ipadic-Neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
         )
 
-sha512sums=('388e5e1331cb3325f2c46a022244df9d0160ed531f5de3fe39394383367ec770ae40c6f00099dc3ea67dd3108c00ae16a9bf56f97cb4893cd2767e3370d93735'
-            'c01cae8e5b013f6b9ac693ec7fac54c21ee3cbd86cfa3e7c328fd4c9d3df23f30634b2df1d041b829a3a52efa51f6f8c75ecd8b6ba989cf66cfbc8e3c53162af'
+sha512sums=('fa16390b7ba5fe777e0326efcbe42dc2ebc8e62ddc7df94387bf0d7c26f290bab80175d63e74e9b6660db661594026a98d673763c654e48ac47dad25119de2d5'
+            '80ef897afb0450e16e67ee4131715500a64987cdb5093f9b68920038edb329216cf35df2c71b3ddec2b53728eb5867b8cbb09ca9d3505a32e032cbeef1f77571'
             '0ce54cc35f532e9d963aadaf98bcac1338b0a7d58db3c840cf84ddccd70c19c963ff4dafe39d8822eab1887a893867ac7622c4a543ad34c170540ecf4ed07bf6'
             '807b68f18e0f9093ccca368fcd4a209a0723167be7aa48e04217f053bc0911399f3bb86b95cb118e64bb9f53f5242c9c51bcff14f81d94ed68db2448c9386b32'
             'f3ea37e785d604d614b8fa27bf03d1b669240b7c28c293d953a3ac40b6faff56893b42f8e082ccc7723edb5b27a4613a99343477a34fc76afd458912025555e9'
