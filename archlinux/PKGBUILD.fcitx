@@ -24,12 +24,12 @@ makedepends=('fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'libibus')
 options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
-	"bazel-build.patch::https://github.com/google/mozc/commit/b5e4538360613f83f28d83e2d6d26dcc355e05f0.patch"
+        "build-script.patch::https://github.com/fcitx/mozc/commit/83c68ed46093deb037b6c9368d55da7e7a0ec181.patch"
         )
 
 sha512sums=('fa16390b7ba5fe777e0326efcbe42dc2ebc8e62ddc7df94387bf0d7c26f290bab80175d63e74e9b6660db661594026a98d673763c654e48ac47dad25119de2d5'
             '80ef897afb0450e16e67ee4131715500a64987cdb5093f9b68920038edb329216cf35df2c71b3ddec2b53728eb5867b8cbb09ca9d3505a32e032cbeef1f77571'
-            'd6fc4344894d07fb424c8865ec051c89e1e75a34d5b8ff9f4582921fd23fdab8bfd084b64736226ca6ab56da6cdea8434dbdaee249c20cfe68f7badc6d9d182a')
+            'e077c843dc717f7e9add0a135762ffe7c3117316f59e504d75764c49a0c06967e54217d3a2fbd7afd3bc118e9ade743746c69af6accbabc4dc5786ce43dba54c')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -41,8 +41,8 @@ prepare() {
   cd "$srcdir/mozc" || exit
   git submodule update --init --recursive
 
-  # PR #1095
-  patch -p1 -i ${srcdir}/bazel-build.patch
+  # PR #68
+  patch -p1 -i ${srcdir}/build-script.patch
 
   cd src || exit
 
