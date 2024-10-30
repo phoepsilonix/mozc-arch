@@ -19,7 +19,7 @@ _sudachidict_date=20241021
 pkgbase=mozc-with-jp-dict
 pkgname=("fcitx-$pkgbase")
 pkgver=2.30.5618.102
-pkgrel=8
+pkgrel=9
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
@@ -44,7 +44,6 @@ source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
 
 sha512sums=('d1dd9b429932506492960078425467845c6360e6dbd549f297f96a2ef7cf591bf7f5609f8cb77ee1dd2ef49fe3294a40eeea00086b8bcdec037d9f1c0988a60c'
             '8acc9d1be54005b44bbcf168c2212b9505313400c5179ed17c4406c2cf222ce6614eea68e80d05868f0c3e547f5373ad31bda2a5d446c155b6847954d3ca8e21'
-            'e077c843dc717f7e9add0a135762ffe7c3117316f59e504d75764c49a0c06967e54217d3a2fbd7afd3bc118e9ade743746c69af6accbabc4dc5786ce43dba54c'
             '0ce54cc35f532e9d963aadaf98bcac1338b0a7d58db3c840cf84ddccd70c19c963ff4dafe39d8822eab1887a893867ac7622c4a543ad34c170540ecf4ed07bf6'
             '807b68f18e0f9093ccca368fcd4a209a0723167be7aa48e04217f053bc0911399f3bb86b95cb118e64bb9f53f5242c9c51bcff14f81d94ed68db2448c9386b32'
             'f3ea37e785d604d614b8fa27bf03d1b669240b7c28c293d953a3ac40b6faff56893b42f8e082ccc7723edb5b27a4613a99343477a34fc76afd458912025555e9'
