@@ -23,13 +23,10 @@ license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT
 makedepends=('fcitx' 'fcitx-qt6' 'bazel' 'git' 'python' 'libibus')
 options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
-        "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
-        "build-script.patch::https://github.com/fcitx/mozc/commit/83c68ed46093deb037b6c9368d55da7e7a0ec181.patch"
-        )
+        "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}")
 
 sha512sums=('d3abb209b9e6f7fd482a74f233ad34a1f095cc7bfecd75c99c607f0f5c6272e941d1fbe00b0738c0ddaa0a41895b94fbe3856dcf21108e4d22fbdb55ac01ff36'
-            '5baf353fd449a717286525102e20228204759138f835898e134cecf4f8f68176f68566a923c66c253f13165232a2d3703aa8fb484f2d6edd7e35a87d1cf7c2c7'
-            'e077c843dc717f7e9add0a135762ffe7c3117316f59e504d75764c49a0c06967e54217d3a2fbd7afd3bc118e9ade743746c69af6accbabc4dc5786ce43dba54c')
+            '5baf353fd449a717286525102e20228204759138f835898e134cecf4f8f68176f68566a923c66c253f13165232a2d3703aa8fb484f2d6edd7e35a87d1cf7c2c7')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -72,7 +69,10 @@ build() {
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge
 
-  bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
+  # fcitx4
+  # unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool
+  env _BUILD_TARGETS="unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool" \
+  ../scripts/build_fcitx5_bazel --registry=file://${srcdir}/bcr --config release_build --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
   bazel shutdown
 }
 
