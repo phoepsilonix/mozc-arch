@@ -38,9 +38,6 @@ prepare() {
   cd "$srcdir/mozc" || exit
   git submodule update --init --recursive
 
-  # PR #68
-  patch -p1 -i ${srcdir}/build-script.patch
-
   cd src || exit
 
   # use libstdc++ instead of libc++
