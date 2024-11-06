@@ -247,7 +247,6 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
-            ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-
 
       - name: Build
         shell: bash
@@ -273,6 +272,7 @@ jobs:
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
           chown -R root:root ../
+          chown -R nonroot:nonroot /github/workspace/.cache
       - name: Generate release note
         id: release_note
         shell: bash
@@ -338,6 +338,7 @@ jobs:
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
           chown -R root:root ../
+          chown -R nonroot:nonroot /github/workspace/.cache
       - name: Generate release note
         id: release_note_2
         shell: bash
