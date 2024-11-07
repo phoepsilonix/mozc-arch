@@ -330,6 +330,11 @@ jobs:
           sudo -u nonroot rm -rf *pkg.tar.zst
           pacman -R fcitx5 fcitx5-qt --noconfirm
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
+          cd mozc
+          sudo -u nonroot git worktree add tmp
+          sudo -u nonroot git worktree remove tmp
+          sudo -u nonroot git branch -d tmp
+          cd ..
           sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           pacman -R fcitx fcitx-qt6 --noconfirm
