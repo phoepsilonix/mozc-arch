@@ -248,7 +248,24 @@ jobs:
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
 
-      - name: Build
+      - name: Mount rustup cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /github/workspace/.rustup
+            /github/workspace/.cargo
+            /github/workspace/.cache/sccache
+          key: ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
+          restore-keys: |
+            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
+            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
+            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
+      - name: Install Rust(non root) for -with-jp-dict
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
+          echo "Running Rust program for ${{ matrix.os }}"
+
+      - name: Build(fcitx)
         shell: bash
         run: |
           sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
@@ -256,6 +273,7 @@ jobs:
           sudo -u nonroot ld.mold --version
           chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
+          sudo -u nonroot git config --global --add safe.directory $PWD
           sudo -u nonroot git clone --filter=tree:0 -b fcitx --mirror https://github.com/fcitx/mozc.git mozc
           sudo -u nonroot git config --add safe.directory $PWD/mozc
           cd mozc
@@ -264,10 +282,38 @@ jobs:
           sudo -u nonroot git branch -d tmp
           cd ..
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
-          sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx --noconfirm
+          sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict --noconfirm
+          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
+          sudo -u nonroot mkdir -p ../release_2
+          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
+          sudo -u nonroot rm -rf *pkg.tar.zst
+          (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
+          sudo -u nonroot mkdir -p ../release
+          sudo -u nonroot mv *.pkg.tar.zst ../release/
+          chown -R root:root ../
+          chown -R nonroot:nonroot /github/workspace/.cache
+      - name: Build(fcitx5 ibus emacs)
+        shell: bash
+        run: |
+          chown -R nonroot:nonroot .
+          chown -R nonroot:nonroot /github/workspace/.cache
+          cd ${{ matrix.os }}
+          sudo -u nonroot rm -rf *pkg.tar.zst
           pacman -R fcitx fcitx-qt6 --noconfirm
           pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          cd mozc
+          sudo -u nonroot git worktree add tmp
+          sudo -u nonroot git worktree remove tmp
+          sudo -u nonroot git branch -d tmp
+          cd ..
+          (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
+          #sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
+          sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
+          sudo -u nonroot mkdir -p ../release_2
+          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
+          sudo -u nonroot rm -rf *pkg.tar.zst
+          (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
           sudo -u nonroot makepkg -ef -p PKGBUILD
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
@@ -296,56 +342,7 @@ jobs:
           echo "${NOTE}"
           echo "EOF"
           } >> $GITHUB_OUTPUT
-      - name: Create release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: "${{ steps.variables.outputs.tag_name }}"
-          name: "${{ steps.variables.outputs.tag_name }}"
-          artifacts: 'release/*'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: "${{ steps.release_note.outputs.release_note }}"
-
-      - name: Mount rustup cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            /github/workspace/.rustup
-            /github/workspace/.cargo
-            /github/workspace/.cache/sccache
-          key: ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
-          restore-keys: |
-            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
-            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
-            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
-      - name: Install Rust(non root) for -with-jp-dict
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
-          echo "Running Rust program for ${{ matrix.os }}"
-
-      - name: Build
-        shell: bash
-        run: |
-          chown -R nonroot:nonroot .
-          chown -R nonroot:nonroot /github/workspace/.cache
-          cd ${{ matrix.os }}
-          sudo -u nonroot rm -rf *pkg.tar.zst
-          pacman -R fcitx5 fcitx5-qt --noconfirm
-          pacman -S fcitx fcitx-qt6 --noconfirm --needed
-          cd mozc
-          sudo -u nonroot git worktree add tmp
-          sudo -u nonroot git worktree remove tmp
-          sudo -u nonroot git branch -d tmp
-          cd ..
-          sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict
-          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
-          pacman -R fcitx fcitx-qt6 --noconfirm
-          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
-          sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
-          sudo -u nonroot mkdir -p ../release_2
-          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
-          chown -R root:root ../
-          chown -R nonroot:nonroot /github/workspace/.cache
-      - name: Generate release note
+      - name: Generate release_2 note
         id: release_note_2
         shell: bash
         run: |
@@ -373,6 +370,15 @@ jobs:
           echo "EOF"
           } >> $GITHUB_OUTPUT
       - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "${{ steps.variables.outputs.tag_name }}"
+          name: "${{ steps.variables.outputs.tag_name }}"
+          artifacts: 'release/*'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "${{ steps.release_note.outputs.release_note }}"
+
+      - name: Create release_2
         uses: ncipollo/release-action@v1
         with:
           tag: "${{ steps.variables.outputs.tag_name_2 }}"
