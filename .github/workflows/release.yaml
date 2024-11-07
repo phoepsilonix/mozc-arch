@@ -326,6 +326,7 @@ jobs:
         shell: bash
         run: |
           chown -R nonroot:nonroot .
+          chown -R nonroot:nonroot /github/workspace/.cache
           cd ${{ matrix.os }}
           sudo -u nonroot rm -rf *pkg.tar.zst
           pacman -R fcitx5 fcitx5-qt --noconfirm
