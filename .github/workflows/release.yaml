@@ -291,7 +291,7 @@ jobs:
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
-          chown -R root:root ../
+          #chown -R root:root ../
           chown -R nonroot:nonroot /github/workspace/.cache
       - name: Build(fcitx5 ibus emacs)
         shell: bash
@@ -307,35 +307,36 @@ jobs:
           sudo -u nonroot git worktree remove tmp
           sudo -u nonroot git branch -d tmp
           cd ..
+          #(cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
+          sudo -u nonroot makepkg -ef -p PKGBUILD
+          sudo -u nonroot mkdir -p ../release
+          sudo -u nonroot mv *.pkg.tar.zst ../release/
+          sudo -u nonroot rm -rf *pkg.tar.zst
           (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
           #sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
-          sudo -u nonroot rm -rf *pkg.tar.zst
-          (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
-          sudo -u nonroot makepkg -ef -p PKGBUILD
-          sudo -u nonroot mkdir -p ../release
-          sudo -u nonroot mv *.pkg.tar.zst ../release/
-          chown -R root:root ../
+          #chown -R root:root ../
           chown -R nonroot:nonroot /github/workspace/.cache
       - name: Generate release note
         id: release_note
         shell: bash
         run: |
-          git checkout main
+          sudo -u nonroot git config --add safe.directory $PWD
+          sudo -u nonroot git checkout main
           # FCITX_COMMIT
-          git checkout HEAD~ -- last_commit.txt
+          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          git checkout HEAD -- last_commit.txt
+          sudo -u nonroot git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
           cd ${{ matrix.os }}/mozc/
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
             # Mozc master branch
-            NOTE=$(git log -1 master)
+            NOTE=$(sudo -u nonroot git log -1 master)
           else
             #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
-            NOTE=$(git log -1 master)
+            NOTE=$(sudo -u nonroot git log -1 master)
           fi
           {
           echo "release_note<<EOF"
@@ -346,17 +347,17 @@ jobs:
         id: release_note_2
         shell: bash
         run: |
-          git checkout main
-          git checkout HEAD~ -- last_commit.txt
+          sudo -u nonroot git checkout main
+          sudo -u nonroot git checkout HEAD~ -- last_commit.txt
           OLD_COMMIT=$(cat last_commit.txt)
-          git checkout HEAD -- last_commit.txt
+          sudo -u nonroot git checkout HEAD -- last_commit.txt
           NEW_COMMIT=$(cat last_commit.txt)
           cd ${{ matrix.os }}/mozc
           if [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
-            NOTE=$(git log -1 master)
+            NOTE=$(sudo -u nonroot git log -1 master)
           else
            #NOTE=$(git log $OLD_COMMIT~..$NEW_COMMIT)
-            NOTE=$(git log -1 master)
+            NOTE=$(sudo -u nonroot git log -1 master)
           fi
           {
           echo "release_note<<EOF"
