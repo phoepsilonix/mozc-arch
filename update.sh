@@ -16,7 +16,7 @@ echo $BCR_COMMIT
 
 # PKGBUILD
 COMMIT=$(grep "^_mozc_commit" $1/PKGBUILD|cut -f2 -d"=")
-SUDACHI_DATE=$(grep "^_sudachidict_date" $1/PKGBUILD|cut -f2 -d"=")
+SUDACHI_DATE=$(grep "^_sudachidict_date" $1/PKGBUILD.Dict|cut -f2 -d"=")
 echo $COMMIT
 echo $SUDACHI_DATE
 
