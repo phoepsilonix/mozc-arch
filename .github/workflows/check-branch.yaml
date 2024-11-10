@@ -73,7 +73,7 @@ jobs:
           git config user.name "Masato TOYOSHIMA"
           git config user.email phoepsilonix@phoepsilonix.love
           sudo chown -R nonroot:nonroot .
-          pacman -Syu --noconfirm --needed curl jq yq
+          pacman -Syu --noconfirm --needed curl jq
           echo "Fetch api of head commits from original repository..."
 
           FCITX_COMMIT=$(curl -s https://api.github.com/repos/$FCITX_REPO/commits/fcitx|jq -r ".sha")
