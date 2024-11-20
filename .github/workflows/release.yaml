@@ -226,14 +226,15 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          pacman -S base-devel fakeroot qt6-base python python-six pkg-config curl mesa llvm clang ibus bazel rustup mold sccache --noconfirm --needed
+          pacman -S base-devel fakeroot qt6-base python python-six pkg-config curl mesa llvm clang ibus bazel mold sccache rustup --noconfirm --needed
           curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.34.1/mold-2.34.1-x86_64-linux.tar.gz
           tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
 
       - name: Install bazel
         run: |
           mkdir -p /usr/local/bin
-          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64
+          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64
+          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-linux-x86_64
           chmod +x /usr/local/bin/bazel
           chown -R nonroot:nonroot /github/workspace/.cache
           sudo -u nonroot bazel --version
@@ -264,10 +265,15 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
           echo "Running Rust program for ${{ matrix.os }}"
+          . "/github/workspace/.cargo/env"
+          sudo -u nonroot rustup component add rust-src
+          sudo chown -R nonroot:nonroot /github/workspace/.rustup
+
 
       - name: Build(fcitx)
         shell: bash
         run: |
+          . "/github/workspace/.cargo/env"
           sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
           sudo -u nonroot bazel --version
           sudo -u nonroot ld.mold --version
@@ -296,6 +302,7 @@ jobs:
       - name: Build(fcitx5 ibus emacs)
         shell: bash
         run: |
+          . "/github/workspace/.cargo/env"
           chown -R nonroot:nonroot .
           chown -R nonroot:nonroot /github/workspace/.cache
           cd ${{ matrix.os }}

@@ -11,7 +11,7 @@
 _bldtype=Release
 _mozc_commit=3190665c5330dbcbf137667f87a84cf2bb6a9efa
 _bcr_commit=03521643797d22188f39206089525e4fa90d0960
-_dict_to_mozc_commit=50fcd75e03832907b6927deaa4aeccf190a82fca
+_dict_to_mozc_commit=96271c07749f040dbf64f16f4b4ad65e00841ace
 _branch=fcitx
 # Sudachi Dictionary
 _sudachidict_date=20241021
@@ -43,7 +43,7 @@ source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
 
 sha512sums=('262142068c7cf3eca95cd55e2a055521833a2f0deecefa6b4ee4ded7be66a4a5ce014c727b5603147e70ad0d05a829f7739467fd35fcda0a15e5e4976a4e7eb1'
             '20e754b1be89ce0d8798b2bcc17577c187def5d870a96a32d9e16f3c0cda1bb020cadb97efa439b6a2e1cf2720785ba1dec7d6f06b32788a68a0b1aea17f4655'
-            'b6cf5df0b0125bb14233c38d6e3e0cb9b907b243a18c595815deab374ef444d4f2a52bae0182637edc58d7abb4483e14c323ddb59c9e93e99faddd94739c22ad'
+            '664c24c3c8a82802a9418a039a4cbda54de2d1f7d1635e71e6bcec18e20d69552779b3c027b726a0b9f87666a114459cfe4a39a8fc72e037270bf770c86916e0'
             '807b68f18e0f9093ccca368fcd4a209a0723167be7aa48e04217f053bc0911399f3bb86b95cb118e64bb9f53f5242c9c51bcff14f81d94ed68db2448c9386b32'
             'f3ea37e785d604d614b8fa27bf03d1b669240b7c28c293d953a3ac40b6faff56893b42f8e082ccc7723edb5b27a4613a99343477a34fc76afd458912025555e9'
             '384a8c55e928323a4a6b3f83a6845199c67cd3766ca586ea936c41aeb6728020b2430daeb88de3cc19413b6111db5971552f8a538826d3718ab33b7281226ff8'
@@ -74,9 +74,11 @@ prepare() {
   # nm -f posix (llvm-nm -f posix)
   sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
 
-  rustup update stable
-
   cd "${srcdir}/dict-to-mozc/" || exit
+  #sed -i -e "s|channel *=.*|channel = \"stable\"|" rust-toolchain.toml
+  #sed -i -e "/components.*/d" rust-toolchain.toml
+  rustup update stable
+  msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
   unset RUSTC
