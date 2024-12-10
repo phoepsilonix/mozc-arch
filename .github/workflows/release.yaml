@@ -77,6 +77,7 @@ jobs:
       - name: Setup non-root user
         run: |
           sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
+          sudo cp .bazeliskrc /github/workspace/
           sudo mkdir -p /github/workspace
           sudo mkdir -p /github/workspace/.cache
           sudo mkdir -p /github/workspace/.rustup
@@ -231,10 +232,12 @@ jobs:
           tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
 
       - name: Install bazel
+        env:
+          USE_BAZEL_VERSION: "7.4.1"
         run: |
           mkdir -p /usr/local/bin
-          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.22.0/bazelisk-linux-amd64
-          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-linux-x86_64
+          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.24.1/bazelisk-linux-amd64
+          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-linux-x86_64
           chmod +x /usr/local/bin/bazel
           chown -R nonroot:nonroot /github/workspace/.cache
           sudo -u nonroot bazel --version
@@ -271,6 +274,8 @@ jobs:
 
 
       - name: Build(fcitx)
+        env:
+          USE_BAZEL_VERSION: "7.4.1"
         shell: bash
         run: |
           . "/github/workspace/.cargo/env"
@@ -299,7 +304,10 @@ jobs:
           sudo -u nonroot mv *.pkg.tar.zst ../release/
           #chown -R root:root ../
           chown -R nonroot:nonroot /github/workspace/.cache
+
       - name: Build(fcitx5 ibus emacs)
+        env:
+          USE_BAZEL_VERSION: "7.4.1"
         shell: bash
         run: |
           . "/github/workspace/.cargo/env"
