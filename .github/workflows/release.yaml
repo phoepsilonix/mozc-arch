@@ -82,7 +82,8 @@ jobs:
           sudo mkdir -p /github/workspace/.cache
           sudo mkdir -p /github/workspace/.rustup
           sudo mkdir -p /github/workspace/.cargo
-          sudo cp config.toml /github/workspace/.cargo/
+          #sudo cp config.toml /github/workspace/.cargo/
+          sudo rm /github/workspace/.cargo/config* -f
           sudo chown -R nonroot:nonroot /github/workspace
           sudo -u nonroot whoami
           sudo -u nonroot id
@@ -227,9 +228,20 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          pacman -S base-devel fakeroot qt6-base python python-six pkg-config curl mesa llvm clang ibus bazel mold sccache rustup --noconfirm --needed
-          curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.34.1/mold-2.34.1-x86_64-linux.tar.gz
-          tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
+          pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang ibus bazel mold sccache rustup --noconfirm --needed
+          #sudo rm /usr/sbin/mold /usr/bin/ld.mold /usr/bin/mold -f
+          #curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.35.1/mold-2.35.1-x86_64-linux.tar.gz
+          #tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
+          #hash -r
+          #which mold
+          #mold --version
+          #ld.mold --version
+
+      - name: Install mold linker
+        uses: rui314/setup-mold@staging
+        with:
+          mold-version: 2.35.1
+          make-default: true
 
       - name: Install bazel
         env:
@@ -270,6 +282,7 @@ jobs:
           echo "Running Rust program for ${{ matrix.os }}"
           . "/github/workspace/.cargo/env"
           sudo -u nonroot rustup component add rust-src
+          sudo -u nonroot rustup component add llvm-tools
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
 
 
@@ -279,6 +292,10 @@ jobs:
         shell: bash
         run: |
           . "/github/workspace/.cargo/env"
+          hash -r
+          which mold
+          mold --version
+          ld.mold --version
           sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
           sudo -u nonroot bazel --version
           sudo -u nonroot ld.mold --version
