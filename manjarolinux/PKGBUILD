@@ -24,12 +24,12 @@ makedepends=('fcitx5' 'fcitx5-qt' 'bazel' 'git' 'python' 'libibus' 'rustup')
 options=(!lto)
 source=("git+$url.git#commit=${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
-	fcitx5.tar.xz
+	fcitx5-mozc-conf.patch
         )
 
 sha512sums=('6e93fce29a2a85d2fd562decdfd5acc6265a7c9f0a1655860b5ef0844dbb903ed2640a43bec5afbee856c8a0277a75d530bca3755070676a6d27d2e597da2b4a'
             '686b0837f13cfb4ba858086f1651a0053f1151688e4f119774991e0744d1ee5dd493810423946397f729c9826dff190a6d83b48901a6278cd4daf33839a3d5bb'
-            'ea7155d638d0828c57382c9e0f9be4238af2029eeb0d48cfa99a9f2b4eb1441704846d06f1555a3dcb2ca9277a23031baabb103a386dada2bf41406d67121e45')
+            'fc73631dfa67ef38b3e1c3637c0260ed88fde2a08949d51ccc2d2eb20e5e5641d1ca8455c98463a05322aac8814dc782f880598a2f06564056627bce935fdb6a')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -40,6 +40,8 @@ pkgver() {
 prepare() {
   cd "$srcdir/mozc" || exit
   git submodule update --init --recursive
+
+  patch -p1 -i ${srcdir}/fcitx5-mozc-conf.patch
 
   cd src || exit
 
@@ -135,10 +137,10 @@ package_fcitx5-mozc() {
   cd ${srcdir}/mozc/src || exit
 
   ../scripts/install_fcitx5_bazel
-  install -D -m 644 ${srcdir}/fcitx5/profile                  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/profile"
-  install -D -m 644 ${srcdir}/fcitx5/conf/notifications.conf  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/notifications.conf"
-  install -D -m 644 ${srcdir}/fcitx5/conf/waylandim.conf      "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/waylandim.conf"
-  install -D -m 644 ${srcdir}/fcitx5/conf/xim.conf            "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/xim.conf"
+  install -D -m 644 unix/fcitx5/fcitx5/profile                  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/profile"
+  install -D -m 644 unix/fcitx5/fcitx5/conf/notifications.conf  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/notifications.conf"
+  install -D -m 644 unix/fcitx5/fcitx5/conf/waylandim.conf      "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/waylandim.conf"
+  install -D -m 644 unix/fcitx5/fcitx5/conf/xim.conf            "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/xim.conf"
 }
 
 package_ibus-mozc() {
