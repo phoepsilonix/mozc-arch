@@ -313,6 +313,7 @@ jobs:
           pacman -R fcitx fcitx-qt6 --noconfirm || true
           pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
+          (cd src/dict-to-mozc && sudo -u nonroot cargo clean)
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
@@ -339,7 +340,7 @@ jobs:
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
           (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
           #sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict --noconfirm
-          (cd src/dict-to-mozc && sudo -u nonroot cargo clean)
+          #(cd src/dict-to-mozc && sudo -u nonroot cargo clean)
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
