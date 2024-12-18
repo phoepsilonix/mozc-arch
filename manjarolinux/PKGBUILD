@@ -24,10 +24,12 @@ makedepends=('fcitx5' 'fcitx5-qt' 'bazel' 'git' 'python' 'libibus' 'rustup')
 options=(!lto)
 source=("git+$url.git#commit=${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}"
+	fcitx5.tar.xz
         )
 
 sha512sums=('f99941f0dda8080a4c3fbf2ce9f7009b5043e4b80bef33fb873bd9ff174de2f9f587632cbb32d5cee680e043b35fca60ed70c6eb544f2b0fb518d2d37906e798'
-            '767302aee6e1e52b2160c8055cc7c08f2d4ce7a9f01fe685d7ab85ba5eea53a35c5ba77e2a9e5e6fc13ebbc8dea347c88cf43478bb18f58d3d4129ce5e0fa586')
+            '767302aee6e1e52b2160c8055cc7c08f2d4ce7a9f01fe685d7ab85ba5eea53a35c5ba77e2a9e5e6fc13ebbc8dea347c88cf43478bb18f58d3d4129ce5e0fa586'
+            'ea7155d638d0828c57382c9e0f9be4238af2029eeb0d48cfa99a9f2b4eb1441704846d06f1555a3dcb2ca9277a23031baabb103a386dada2bf41406d67121e45')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
@@ -124,6 +126,7 @@ package_fcitx5-mozc() {
   provides=('fcitx5-mozc')
   replaces=('fcitx5-mozc')
   conflicts=('fcitx-mozc' 'fcitx5-mozc' 'fcitx' 'fcitx-qt5' 'fcitx-qt6' 'ibus-mozc')
+  install=fcitx5-mozc.install
 
   install_mozc-common
   ../scripts/install_server_bazel
@@ -132,6 +135,10 @@ package_fcitx5-mozc() {
   cd ${srcdir}/mozc/src || exit
 
   ../scripts/install_fcitx5_bazel
+  install -D -m 644 ${srcdir}/fcitx5/profile                  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/profile"
+  install -D -m 644 ${srcdir}/fcitx5/conf/notifications.conf  "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/notifications.conf"
+  install -D -m 644 ${srcdir}/fcitx5/conf/waylandim.conf      "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/waylandim.conf"
+  install -D -m 644 ${srcdir}/fcitx5/conf/xim.conf            "$pkgdir/usr/share/fcitx5-mozc/fcitx5/conf/xim.conf"
 }
 
 package_ibus-mozc() {

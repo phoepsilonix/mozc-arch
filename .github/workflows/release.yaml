@@ -285,8 +285,7 @@ jobs:
           sudo -u nonroot rustup component add llvm-tools
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
 
-
-      - name: Build(fcitx)
+      - name: Build(fcitx5 ibus emacs)
         env:
           USE_BAZEL_VERSION: "7.4.1"
         shell: bash
@@ -309,12 +308,41 @@ jobs:
           sudo -u nonroot git worktree remove tmp
           sudo -u nonroot git branch -d tmp
           cd ..
+          chown -R nonroot:nonroot .
+          chown -R nonroot:nonroot /github/workspace/.cache
+          pacman -R fcitx fcitx-qt6 --noconfirm || true
+          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
+          sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
+          sudo -u nonroot mkdir -p ../release_2
+          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
+          (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
+          sudo -u nonroot makepkg -ef -p PKGBUILD
+          sudo -u nonroot mkdir -p ../release
+          sudo -u nonroot mv *.pkg.tar.zst ../release/
+          #chown -R root:root ../
+          chown -R nonroot:nonroot /github/workspace/.cache
+
+      - name: Build(fcitx)
+        env:
+          USE_BAZEL_VERSION: "7.4.1"
+        shell: bash
+        run: |
+          . "/github/workspace/.cargo/env"
+          hash -r
+          which mold
+          mold --version
+          ld.mold --version
+          cd ${{ matrix.os }}
+          sudo -u nonroot rm -rf *pkg.tar.zst
+          pacman -R fcitx5 fcitx5-qt --noconfirm
           pacman -S fcitx fcitx-qt6 --noconfirm --needed
-          sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict --noconfirm
+          (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
+          #sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict --noconfirm
+          (cd src/dict-to-mozc && sudo -u nonroot cargo clean)
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
-          sudo -u nonroot rm -rf *pkg.tar.zst
           (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
           sudo -u nonroot mkdir -p ../release
@@ -322,35 +350,6 @@ jobs:
           #chown -R root:root ../
           chown -R nonroot:nonroot /github/workspace/.cache
 
-      - name: Build(fcitx5 ibus emacs)
-        env:
-          USE_BAZEL_VERSION: "7.4.1"
-        shell: bash
-        run: |
-          . "/github/workspace/.cargo/env"
-          chown -R nonroot:nonroot .
-          chown -R nonroot:nonroot /github/workspace/.cache
-          cd ${{ matrix.os }}
-          sudo -u nonroot rm -rf *pkg.tar.zst
-          pacman -R fcitx fcitx-qt6 --noconfirm
-          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
-          cd mozc
-          sudo -u nonroot git worktree add tmp
-          sudo -u nonroot git worktree remove tmp
-          sudo -u nonroot git branch -d tmp
-          cd ..
-          #(cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
-          sudo -u nonroot makepkg -ef -p PKGBUILD
-          sudo -u nonroot mkdir -p ../release
-          sudo -u nonroot mv *.pkg.tar.zst ../release/
-          sudo -u nonroot rm -rf *pkg.tar.zst
-          (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
-          #sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
-          sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
-          sudo -u nonroot mkdir -p ../release_2
-          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
-          #chown -R root:root ../
-          chown -R nonroot:nonroot /github/workspace/.cache
       - name: Generate release note
         id: release_note
         shell: bash
