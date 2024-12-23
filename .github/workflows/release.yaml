@@ -44,8 +44,9 @@ jobs:
           pacman -Syu --noconfirm --needed
           pacman -S sudo git --noconfirm --needed
       - name: manjaro_jp
-        if: matrix.os == 'manjarolinux'
+        if: matrix.os == 'manjarolinux-jp'
         run: |
+          # historical
           (echo ;cat manjaro_jp.txt) | tee -a /etc/pacman.conf
           pacman -S curl htmlq --needed --noconfirm
           KEYRING=$(curl -s https://manjaro-jp.phoepsilonix.love/manjaro-jp/|htmlq 'a[href^="manjaro_jp"][href$=".zst"]' --attribute href)
@@ -93,12 +94,12 @@ jobs:
           export CC=clang
           export CXX=clang++
           export LD=ld.mold
-          echo "export PATH=$PATH" |sudo tee -a /etc/environment
-          echo "export CC=$CC" |sudo tee -a /etc/environment
-          echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
-          echo "export CXX=$CXX" |sudo tee -a /etc/environment
-          echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
-          echo "export LD=$LD" |sudo tee -a /etc/environment
+          #echo "export PATH=$PATH" |sudo tee -a /etc/environment
+          #echo "export CC=$CC" |sudo tee -a /etc/environment
+          #echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
+          #echo "export CXX=$CXX" |sudo tee -a /etc/environment
+          #echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
+          #echo "export LD=$LD" |sudo tee -a /etc/environment
           whoami
           id
           source /etc/makepkg.conf
@@ -274,14 +275,11 @@ jobs:
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
-      - name: Install Rust(non root) for -with-jp-dict
+      - name: ownership for Rust(non root) for -with-jp-dict
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u nonroot sh -s -- -y
-          echo "Running Rust program for ${{ matrix.os }}"
-          . "/github/workspace/.cargo/env"
-          sudo -u nonroot rustup component add rust-src
-          sudo -u nonroot rustup component add llvm-tools
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
+          sudo chown -R nonroot:nonroot /github/workspace/.cargo
+          sudo chown -R nonroot:nonroot /github/workspace/.cache
 
       - name: Build(fcitx5 ibus emacs)
         env:
@@ -308,6 +306,7 @@ jobs:
           cd ..
           chown -R nonroot:nonroot .
           chown -R nonroot:nonroot /github/workspace/.cache
+          chown -R nonroot:nonroot /github/workspace/.cargo
           #pacman -R fcitx fcitx-qt6 --noconfirm || true
           pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           export HOSTCC=clang
@@ -332,6 +331,11 @@ jobs:
         shell: bash
         run: |
           . "/github/workspace/.cargo/env"
+          export HOSTCC=clang
+          export HOSTCXX=clang++
+          export CC=clang
+          export CXX=clang++
+          export LD=ld.mold
           hash -r
           which mold
           mold --version

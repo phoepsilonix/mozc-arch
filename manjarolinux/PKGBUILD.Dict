@@ -85,9 +85,6 @@ prepare() {
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
   unset RUSTC
-  [ -z $CC ] && CC=clang
-  sed -i -e "s/^#linker=.*/linker=$CC/" .cargo/config.toml
-  sed -i -e "s/Bmold/fuse-ld=mold/" .cargo/config.toml
   cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
   # すだちを優先
   msg '2. Convert SudachiDict to Mozc System Dictionary format. It may take some time...'
