@@ -11,7 +11,7 @@
 _bldtype=Release
 _mozc_commit=22ab9e6e96b8904f853b2d43d9406b8bb974322f
 _bcr_commit=8b8489ef80d1171754cf8fe8b1f4b258550141f3
-_dict_to_mozc_commit=48c32fb7befa26f9cdb42d99ac69da4e46d37cca
+_dict_to_mozc_commit=45d73f9f72560113201779df266c2d053491fbb0
 _branch=fcitx
 # Sudachi Dictionary
 _sudachidict_date=20241021
@@ -44,7 +44,7 @@ source=("git+$url.git#commit=${_mozc_commit}"
 
 sha512sums=('408fe521b950aff4870aeee7b79e601d2776b5236e212928d14f8c6c77748b68fe36f43c7eceb11171a4603028bc7db313b2068c79460a300b1ff97ac86e484d'
             '1c83482f4f75707929e35aa4f2ef37d3ce6bc084d1c4df49cb9ff76dd150a0220296445c2c4df512b395624820c87a42822d84401919ec5a1486b7e84de1e795'
-            '4f0cac247100eb6671d9ef8022890909c954d0a4b060bdb0b5ad2eaf7870be020bb715570177d65235ff442692b427fbfa3c079fde3a286b7101eac3a38f761b'
+            '4b62bc9f709d28267af7a3745198a42890bbe61a8365ebd8c2efb17ba94c9de91a2a7f350da1c3624a42337ee9bbc6437c3c7060b3155c78ff22609940caa736'
             '807b68f18e0f9093ccca368fcd4a209a0723167be7aa48e04217f053bc0911399f3bb86b95cb118e64bb9f53f5242c9c51bcff14f81d94ed68db2448c9386b32'
             'f3ea37e785d604d614b8fa27bf03d1b669240b7c28c293d953a3ac40b6faff56893b42f8e082ccc7723edb5b27a4613a99343477a34fc76afd458912025555e9'
             '384a8c55e928323a4a6b3f83a6845199c67cd3766ca586ea936c41aeb6728020b2430daeb88de3cc19413b6111db5971552f8a538826d3718ab33b7281226ff8'
@@ -85,7 +85,7 @@ prepare() {
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
   unset RUSTC
-  cargo build --release --target $TARGET -F use-mimalloc || cargo build --release --target $TARGET
+  cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
   # すだちを優先
   msg '2. Convert SudachiDict to Mozc System Dictionary format. It may take some time...'
   cat "${srcdir}"/mozc/src/data/dictionary_oss/dictionary*.txt > all-dict.txt
