@@ -88,12 +88,16 @@ jobs:
           sudo -u nonroot whoami
           sudo -u nonroot id
           PATH=/usr/local/bin:$PATH
-          CC=clang
-          CXX=clang++
-          LD=ld.mold
+          export HOSTCC=clang
+          export HOSTCXX=clang++
+          export CC=clang
+          export CXX=clang++
+          export LD=ld.mold
           echo "export PATH=$PATH" |sudo tee -a /etc/environment
           echo "export CC=$CC" |sudo tee -a /etc/environment
+          echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
           echo "export CXX=$CXX" |sudo tee -a /etc/environment
+          echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
           echo "export LD=$LD" |sudo tee -a /etc/environment
           whoami
           id
@@ -237,12 +241,6 @@ jobs:
           #mold --version
           #ld.mold --version
 
-      - name: Install mold linker
-        uses: rui314/setup-mold@staging
-        with:
-          mold-version: 2.35.1
-          make-default: true
-
       - name: Install bazel
         env:
           USE_BAZEL_VERSION: "7.4.1"
@@ -310,10 +308,14 @@ jobs:
           cd ..
           chown -R nonroot:nonroot .
           chown -R nonroot:nonroot /github/workspace/.cache
-          pacman -R fcitx fcitx-qt6 --noconfirm || true
+          #pacman -R fcitx fcitx-qt6 --noconfirm || true
           pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          export HOSTCC=clang
+          export HOSTCXX=clang++
+          export CC=clang
+          export CXX=clang++
+          export LD=ld.mold
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
-          (cd src/dict-to-mozc && sudo -u nonroot cargo clean)
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
