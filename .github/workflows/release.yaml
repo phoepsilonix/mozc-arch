@@ -277,6 +277,7 @@ jobs:
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
       - name: ownership for Rust(non root) for -with-jp-dict
         run: |
+          sudo rm -rf /github/workspace/.cache/*
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
           sudo chown -R nonroot:nonroot /github/workspace/.cargo
           sudo chown -R nonroot:nonroot /github/workspace/.cache
