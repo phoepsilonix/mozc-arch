@@ -277,7 +277,8 @@ jobs:
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
       - name: ownership for Rust(non root) for -with-jp-dict
         run: |
-          sudo rm -rf /github/workspace/.cache/*
+          # cache clean
+          #sudo rm -rf /github/workspace/.cache/*
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
           sudo chown -R nonroot:nonroot /github/workspace/.cargo
           sudo chown -R nonroot:nonroot /github/workspace/.cache
@@ -356,7 +357,8 @@ jobs:
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
           #chown -R root:root ../
-          chown -R nonroot:nonroot /github/workspace/.cache
+          #chown -R nonroot:nonroot /github/workspace/.cache
+          chown -R root:root /github/workspace/.cache
 
       - name: Generate release note
         id: release_note
