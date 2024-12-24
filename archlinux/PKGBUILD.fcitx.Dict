@@ -111,7 +111,7 @@ build() {
   CFLAGS="${CFLAGS} -fvisibility=hidden"
   CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
-  export USE_BAZEL_VERSION=7.4.1
+  export USE_BAZEL_VERSION=8.0.0
   BAZEL_COPTS=""
   BAZEL_CXXOPTS=""
   for f in $CFLAGS;do ([[ ! $f =~ _FORTIFY_SOURCE ]]) && BAZEL_COPTS+=" --copt $f";done
