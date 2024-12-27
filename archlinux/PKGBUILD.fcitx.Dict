@@ -126,8 +126,9 @@ build() {
 
   # fcitx4
   # unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool
-  env _BUILD_TARGETS="unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool" \
-  ../scripts/build_fcitx5_bazel --registry=file://${srcdir}/bcr --config release_build --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
+  #env _BUILD_TARGETS="unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool" \
+  #
+  ../scripts/build_fcitx_bazel --registry=file://${srcdir}/bcr --config release_build --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
   bazel shutdown
 }
 

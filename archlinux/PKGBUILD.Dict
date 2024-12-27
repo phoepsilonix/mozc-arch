@@ -131,7 +131,7 @@ build() {
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge
 
-  bazel build --registry=file://$srcdir/bcr --config oss_linux --config release_build package unix/fcitx5:fcitx5-mozc.so --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS
+  ../scripts/build_fcitx5_bazel --registry=file://${srcdir}/bcr --config release_build --cxxopt=-Wno-uninitialized --host_cxxopt=-Wno-uninitialized $BAZEL_LDOPTS $BAZEL_COPTS $BAZEL_CXXOPTS package
   bazel shutdown
 }
 
