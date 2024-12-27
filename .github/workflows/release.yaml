@@ -78,7 +78,7 @@ jobs:
       - name: Setup non-root user
         run: |
           sudo useradd -m -d /github/workspace/ -s /usr/bin/bash nonroot
-          sudo cp .bazeliskrc /github/workspace/
+          #sudo cp .bazeliskrc /github/workspace/
           sudo mkdir -p /github/workspace
           sudo mkdir -p /github/workspace/.cache
           sudo mkdir -p /github/workspace/.rustup
