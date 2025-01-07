@@ -114,12 +114,8 @@ build() {
   CFLAGS="${CFLAGS} -fvisibility=hidden"
   CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
+  # for bazelisk
   export USE_BAZEL_VERSION=8.0.0
-  BAZEL_COPTS=""
-  BAZEL_CXXOPTS=""
-  for f in $CFLAGS;do ([[ ! $f =~ _FORTIFY_SOURCE ]]) && BAZEL_COPTS+=" --copt $f";done
-  for f in $CXXFLAGS;do ([[ ! $f =~ _FORTIFY_SOURCE ]]) && BAZEL_CXXOPTS+=" --cxxopt $f";done
-  BAZEL_LDOPTS=$(echo $LDFLAGS | xargs -n1 echo "--linkopt")
 
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge
