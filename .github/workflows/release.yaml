@@ -283,7 +283,7 @@ jobs:
           sudo chown -R nonroot:nonroot /github/workspace/.cargo
           sudo chown -R nonroot:nonroot /github/workspace/.cache
 
-      - name: Build(fcitx5 ibus emacs)
+      - name: Build with Dict(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
           USE_BAZEL_VERSION: "8.0.0"
         shell: bash
@@ -318,16 +318,15 @@ jobs:
           export LD=ld.mold
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
+          pacman -R fcitx5 fcitx5-qt --noconfirm
+          pacman -S fcitx fcitx-qt6 --noconfirm --needed
+          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
-          (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
-          sudo -u nonroot makepkg -ef -p PKGBUILD
-          sudo -u nonroot mkdir -p ../release
-          sudo -u nonroot mv *.pkg.tar.zst ../release/
           #chown -R root:root ../
           chown -R nonroot:nonroot /github/workspace/.cache
 
-      - name: Build(fcitx)
+      - name: Build normal pkg(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
           USE_BAZEL_VERSION: "8.0.0"
         shell: bash
@@ -344,16 +343,14 @@ jobs:
           ld.mold --version
           cd ${{ matrix.os }}
           sudo -u nonroot rm -rf *pkg.tar.zst
-          pacman -R fcitx5 fcitx5-qt --noconfirm
-          pacman -S fcitx fcitx-qt6 --noconfirm --needed
-          (cd src/dict-to-mozc;sudo -u nonroot cp -a tmp/* ../mozc/src/data/dictionary_oss/)
-          #sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx.Dict --noconfirm
-          #(cd src/dict-to-mozc && sudo -u nonroot cargo clean)
-          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
-          sudo -u nonroot mkdir -p ../release_2
-          sudo -u nonroot mv *.pkg.tar.zst ../release_2/
+          #pacman -R fcitx5 fcitx5-qt --noconfirm
+          #pacman -S fcitx fcitx-qt6 --noconfirm --needed
           (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
+          #sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx --noconfirm
           sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
+          pacman -R fcitx fcitx-qt6 --noconfirm
+          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          sudo -u nonroot makepkg -ef -p PKGBUILD
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
           #chown -R root:root ../
