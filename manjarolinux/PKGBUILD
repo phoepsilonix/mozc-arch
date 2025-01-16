@@ -134,8 +134,7 @@ package_fcitx5-mozc() {
   depends=('fcitx5' 'fcitx5-qt' 'hicolor-icon-theme')
   optdepends=('fcitx5-configtool')
   provides=('fcitx5-mozc')
-  replaces=('fcitx5-mozc')
-  conflicts=('fcitx-mozc' 'fcitx5-mozc' 'fcitx' 'fcitx-qt5' 'fcitx-qt6' 'ibus-mozc')
+  conflicts=('fcitx-mozc' 'fcitx' 'fcitx-qt5' 'fcitx-qt6' 'ibus-mozc')
   install=fcitx5-mozc.install
 
   install_mozc-common
@@ -154,8 +153,7 @@ package_fcitx5-mozc() {
 package_ibus-mozc() {
   pkgdesc="IBus engine module for Mozc(the Open Source Edition of Google Japanese Input)"
   depends=('ibus>=1.4.1' "qt6-base" 'libibus')
-  replaces=('ibus-mozc')
-  conflicts=('ibus-mozc' 'fcitx' 'fcitx-configtool' 'fcitx-qt5' 'fcitx-qt6' 'fcitx-mozc' 'fcitx5' 'fcitx5-configtool' 'fcitx5-qt' 'fcitx5-mozc')
+  conflicts=('fcitx' 'fcitx-configtool' 'fcitx-qt5' 'fcitx-qt6' 'fcitx-mozc' 'fcitx5' 'fcitx5-configtool' 'fcitx5-qt' 'fcitx5-mozc')
 
   install_mozc-common
   ../scripts/install_server_bazel
@@ -177,8 +175,6 @@ package_emacs-mozc() {
   pkgdesc="Emacs engine module for Mozc(the Open Source Edition of Google Japanese Input)"
   license=('BSD-3-Clause')
   depends=("emacs" gcc-libs glibc)
-  replaces=('emacs-mozc')
-  conflicts=('emacs-mozc')
 
   install_mozc-common
   export _bldtype

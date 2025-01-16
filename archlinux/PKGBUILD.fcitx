@@ -129,8 +129,7 @@ package_fcitx-mozc() {
   depends=('fcitx' 'fcitx-qt6')
   optdepends=('fcitx-configtool')
   provides=('fcitx-mozc')
-  replaces=('fcitx-mozc')
-  conflicts=('fcitx-mozc' 'fcitx5-mozc' 'ibus-mozc')
+  conflicts=('fcitx5-mozc' 'ibus-mozc')
 
   install_mozc-common
   ../scripts/install_server_bazel
