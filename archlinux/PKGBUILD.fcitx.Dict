@@ -191,7 +191,7 @@ package_fcitx-mozc-with-jp-dict() {
   depends=('fcitx' 'fcitx-qt6')
   optdepends=('fcitx-configtool')
   provides=('fcitx-mozc')
-  conflicts=('fcitx5-mozc' 'ibus-mozc')
+  conflicts=('fcitx5-mozc' 'fcitx-mozc' 'ibus-mozc')
 
   install_mozc-with-jp-dict-common
   ../scripts/install_server_bazel
