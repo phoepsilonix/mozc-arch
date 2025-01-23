@@ -39,7 +39,7 @@ source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         # Neologd-ipadic https://github.com/neologd/mecab-ipadic-neologd
         https://github.com/phoepsilonix/mecab-ipadic-neologd/raw/refs/heads/master/seed/mecab-user-dict-seed.20200910.csv.xz
         LICENSE-MeCab-ipadic-Neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
-        )
+)
 
 sha512sums=('b43d67b7c09d6f1e0b424676e688e4c03ab77d524bea59479ebcb4237545f3a9ae11bddef7c814bdededc6357b190b51c14edd2b4168f0fb051e7e00ffb7ba74'
             'a7ce0c890eb81aa960e74bd1616d0eee655296acd51e0d4dc3a97ffb86b0409779b82eb6857e579d78c397212d368833e757467a708e29ed47095d3d4325a97e'
