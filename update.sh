@@ -51,7 +51,11 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
     PKG_REL=$(($(grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"=")+1))
     echo $PKG_REL
     sudo -u nonroot sed -i 's|^pkgrel=.*$|pkgrel='"${PKG_REL}"'|' $1/PKGBUILD*
-    sudo -u nonroot sed -i 's|^pkgver=.*$|pkgver='"${PKG_VER}"'|' $1/PKGBUILD*
+    PKG_VER_=$(($(grep "^pkgver" $1/PKGBUILD|cut -f2 -d"=")+1))
+	if [[ "$PKG_VER" != "$PKG_VER_" ]]
+    	sudo -u nonroot sed -i 's|^pkgver=.*$|pkgver='"${PKG_VER}"'|' $1/PKGBUILD*
+    	sudo -u nonroot sed -i 's|^pkgrel=.*$|pkgrel='"1"'|' $1/PKGBUILD*
+	}
 else
     echo "No change Detected."
 fi
