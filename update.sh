@@ -44,7 +44,7 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
     sudo -u nonroot git branch -d tmp
 	sudo -u nonroot git clone mozc src/
 	cd src/mozc/
-  	source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
+	source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
 	PKG_VER=$(printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))")
     popd
     grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"="
