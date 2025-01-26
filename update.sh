@@ -42,11 +42,16 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
     sudo -u nonroot git worktree add tmp
     sudo -u nonroot git worktree remove tmp
     sudo -u nonroot git branch -d tmp
+	sudo -u nonroot git clone mozc src/
+	cd src/mozc/
+  	source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
+	PKG_VER=$(printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))")
     popd
     grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"="
     PKG_REL=$(($(grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"=")+1))
     echo $PKG_REL
     sudo -u nonroot sed -i 's|^pkgrel=.*$|pkgrel='"${PKG_REL}"'|' $1/PKGBUILD*
+    sudo -u nonroot sed -i 's|^pkgver=.*$|pkgver='"${PKG_VER}"'|' $1/PKGBUILD*
 else
     echo "No change Detected."
 fi
