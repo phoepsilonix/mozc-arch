@@ -9,8 +9,8 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=8f998f8925789b453266df9dad09b801464f365e
-_bcr_commit=7c73583e98eec15755568f83e995ca9df5531222
+_mozc_commit=bac7b33c355d137fbdf772ac795bf84f28a951cd
+_bcr_commit=a4b4f39cc5c469bdedb301bc4973cd4e3ee0bce7
 _branch=fcitx
 
 pkgbase=mozc
@@ -27,8 +27,8 @@ source=("git+$url.git#commit=${_mozc_commit}"
         fcitx5-mozc-conf.patch
 )
 
-sha512sums=('5138fca976868095fbf23cfdc07e0cc6d1063f31c576a99c5626284b737962340fdd8200623c7f7e0e2be77378bc843314c5b66d4c98dd652eb7a50f03f72b38'
-            '6fcfff39567e68cc013b49b483f206382b67d9a7da72acfba21974c232a04f291d501590e98778a41a5d8007411e61d6b9bca003e4bf464fe6c6f96f8aaa882d'
+sha512sums=('3dc070abe3474e96b5a7f38f7c17d6d9684078a03c79789c5b60b9d1467ff5fbcee71b17dabadaec107c706d2ecef02d41b6dc2f94e832325a8f14211f2d3157'
+            '218f1f46a0113c6d9c30f9c3cdd3a7d042d05be28844a5f130bbab1eab56bf11e5f5a2df77d48faab13cf19e98fa8714c4c016341db2e2d05963b50544d7cb30'
             '178fbcf2878734c1fca84408e0203293be7ad890572296ab842b78b4b4c0ae85c9f7300d9defb1f8c5cc5c4de549ad91760051b2cb32ecd078c938b0fd46ef5d')
 
 pkgver() {
