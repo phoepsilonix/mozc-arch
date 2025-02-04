@@ -273,9 +273,9 @@ jobs:
             /github/workspace/.cache/sccache
           key: ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
           restore-keys: |
-            ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
+
       - name: ownership for Rust(non root) for -with-jp-dict
         run: |
           # cache clean
