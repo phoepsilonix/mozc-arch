@@ -219,6 +219,7 @@ jobs:
           PKGREL=$(grep pkgrel= archlinux/PKGBUILD|head -n1|cut -f2 -d"=")
           echo "fcitx5_mozc_pkgver=$PKGVER" >> $GITHUB_OUTPUT
           echo "fcitx5_mozc_pkgrel=$PKGREL" >> $GITHUB_OUTPUT
+          echo "fcitx5_mozc_pkgrel_=$((PKGREL-1))" >> $GITHUB_OUTPUT
 
       - name: check variables
         run: |
@@ -250,8 +251,7 @@ jobs:
           curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.25.0/bazelisk-linux-amd64
           #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/8.0.1/bazel-8.0.1-linux-x86_64
           chmod +x /usr/local/bin/bazel
-          chown -R nonroot:nonroot /github/workspace/.cache
-          sudo -u nonroot bazel --version
+          sudo chown -R root:root /github/workspace/.cache
 
 
       - name: Bazel Cache
@@ -259,10 +259,17 @@ jobs:
         with:
           path: |
             /github/workspace/.cache/bazel
-          key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-$((${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}-1))
+          key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel_ }}
           restore-keys: |
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-
+
+      - name: Bazel check
+        env:
+          USE_BAZEL_VERSION: "8.0.1"
+        run: |
+          sudo chown -R nonroot:nonroot /github/workspace/.cache
+          sudo -u nonroot bazel --version
 
       - name: Mount rustup cache
         uses: actions/cache@v4
@@ -271,7 +278,7 @@ jobs:
             /github/workspace/.rustup
             /github/workspace/.cargo
             /github/workspace/.cache/sccache
-          key: ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-$((${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}-1))
+          key: ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel_ }}
           restore-keys: |
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
             ${{ matrix.os }}-rustup-${{ steps.startup.outputs.container_name }}-
@@ -282,7 +289,7 @@ jobs:
           #sudo rm -rf /github/workspace/.cache/*
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
           sudo chown -R nonroot:nonroot /github/workspace/.cargo
-          sudo chown -R nonroot:nonroot /github/workspace/.cache
+          #sudo chown -R nonroot:nonroot /github/workspace/.cache
 
       - name: Build with Dict(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
