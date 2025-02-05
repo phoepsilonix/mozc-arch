@@ -252,6 +252,8 @@ jobs:
           #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/8.0.1/bazel-8.0.1-linux-x86_64
           chmod +x /usr/local/bin/bazel
           #sudo chown -R root:root /github/workspace/.cache
+          # remove cache
+          sudo rm -rf /github/workspace/.cache/bazel/*
           sudo chown -R nonroot:nonroot /github/workspace/.cache
           sudo -u nonroot bazel --version
 
