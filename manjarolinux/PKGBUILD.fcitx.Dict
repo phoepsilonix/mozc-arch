@@ -80,6 +80,8 @@ prepare() {
   rustup update stable
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
+  [ -z $TARGET ] && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|head -n1)
+  echo "target:" $TARGET
   unset RUSTC
   #CC_=$CC
   #unset CC
