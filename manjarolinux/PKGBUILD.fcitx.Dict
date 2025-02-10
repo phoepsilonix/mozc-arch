@@ -79,7 +79,8 @@ prepare() {
   #sed -i -e "/components.*/d" rust-toolchain.toml
   rustup update stable
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
-  rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n) | grep -v musl && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1) || TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
+  TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep -v musl|head -n1)
+  [ -z $TARGET ] && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|grep musl|head -n1)
   [ -z $TARGET ] && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|head -n1)
   echo "target:" $TARGET
   unset RUSTC
@@ -117,7 +118,7 @@ build() {
   CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
   # for bazelisk
-  export USE_BAZEL_VERSION=8.0.0
+  export USE_BAZEL_VERSION=8.0.1
 
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge

@@ -257,18 +257,18 @@ jobs:
           sudo chown -R nonroot:nonroot /github/workspace/.cache
           sudo -u nonroot bazel --version
           # for cache scope of branch
-          git config --global --add safe.directory .
+          #git checkout main
+          #git config --global --add safe.directory .
           sudo -u nonroot git config --global --add safe.directory /github/workspace/
-          git checkout main
-          sudo mkdir -p ${{ github.workspace }}/.cache/
+          sudo mkdir -p ${{ github.workspace }}/.cache/bazel
+          sudo chmod 777 ${{ github.workspace }}/.cache/bazel
           sudo mkdir -p ${{ github.workspace }}/.rustup/
           sudo mkdir -p ${{ github.workspace }}/.cargo/
 
       - name: Bazel Cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/.cache/bazel
+          path: ${{ github.workspace }}/.cache/bazel
           key: ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-${{ steps.variables.outputs.fcitx5_mozc_pkgrel_ }}
           restore-keys: |
             ${{ matrix.os }}-bazel-${{ steps.startup.outputs.container_name }}-${{ steps.variables.outputs.fcitx5_mozc_pkgver }}-
@@ -294,12 +294,15 @@ jobs:
 
       - name: ownership for Cache(non root) for -with-jp-dict
         run: |
-          sudo cp -afl ${{ github.workspace }}/.cache /github/workspace/
-          sudo cp -afl ${{ github.workspace }}/.rustup /github/workspace/
-          sudo cp -afl ${{ github.workspace }}/.cargo /github/workspace/
+          sudo cp -af ${{ github.workspace }}/.cache /github/workspace/
+          sudo cp -af ${{ github.workspace }}/.rustup /github/workspace/
+          sudo cp -af ${{ github.workspace }}/.cargo /github/workspace/
           sudo chown -R nonroot:nonroot /github/workspace/.rustup
           sudo chown -R nonroot:nonroot /github/workspace/.cargo
           sudo chown -R nonroot:nonroot /github/workspace/.cache
+          sudo du -hd2 /github/workspace/.cache/
+          sudo du -hd1 /github/workspace/.rustup/
+          sudo du -hd1 /github/workspace/.cargo/
 
       - name: Build with Dict(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
@@ -373,12 +376,21 @@ jobs:
           sudo -u nonroot mv *.pkg.tar.zst ../release/
           #chown -R root:root ../
           #chown -R nonroot:nonroot /github/workspace/.cache
-          sudo cp -afl /github/workspace/.rustup/ ${{ github.workspace }}/
-          sudo cp -afl /github/workspace/.cargo/ ${{ github.workspace }}/
-          sudo cp -afl /github/workspace/.cache/ ${{ github.workspace }}/
+
+      - name: cache
+        run: |
+          sudo cp -af /github/workspace/.rustup/ ${{ github.workspace }}/
+          sudo cp -af /github/workspace/.cargo/ ${{ github.workspace }}/
+          sudo cp -af /github/workspace/.cache/ ${{ github.workspace }}/
           sudo chown -R root:root ${{ github.workspace }}/.rustup/
           sudo chown -R root:root ${{ github.workspace }}/.cargo/
           sudo chown -R root:root ${{ github.workspace }}/.cache/
+          sudo du -hd2 ${{ github.workspace }}/.cache/
+          sudo du -hd1 ${{ github.workspace }}/.rustup/
+          sudo du -hd1 ${{ github.workspace }}/.cargo/
+          sudo du -hd2 /github/workspace/.cache/
+          sudo du -hd1 /github/workspace/.rustup/
+          sudo du -hd1 /github/workspace/.cargo/
 
       - name: Generate release note
         id: release_note
