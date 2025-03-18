@@ -120,7 +120,7 @@ jobs:
         run: |
           git clone --filter=tree:0 -b master https://github.com/phoepsilonix/mozc.git source
           cd source
-          git config --global --add safe.directory $PWD
+          #git config --global --add safe.directory $PWD
 
       - name: Setup Variables
         id: variables
@@ -259,7 +259,7 @@ jobs:
           # for cache scope of branch
           #git checkout main
           #git config --global --add safe.directory .
-          sudo -u nonroot git config --global --add safe.directory /github/workspace/
+          #sudo -u nonroot git config --global --add safe.directory /github/workspace/
           #sudo mkdir -p ${{ github.workspace }}/.cache/bazel
           #sudo chmod 777 ${{ github.workspace }}/.cache/bazel
           #sudo mkdir -p ${{ github.workspace }}/.rustup/
@@ -321,8 +321,14 @@ jobs:
           sudo -u nonroot ld.mold --version
           chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
+          git --version
           sudo -u nonroot git config --global --add safe.directory $PWD
-          sudo -u nonroot git clone --filter=tree:0 -b fcitx --mirror https://github.com/fcitx/mozc.git mozc
+          cat ~/.gitconfig
+          ls -la
+          # git 2.49(mirror and no-single-branch: fatal multiple update tag error,mirror and branch and single-branch or mirror and no branch)
+          #echo sudo -u nonroot git clone --filter=tree:0 -b fcitx --single-branch --mirror https://github.com/fcitx/mozc.git mozc
+          echo sudo -u nonroot git clone --filter=tree:0 --mirror https://github.com/fcitx/mozc.git mozc
+          sudo -u nonroot git clone --filter=tree:0 --mirror https://github.com/fcitx/mozc.git mozc
           sudo -u nonroot git config --add safe.directory $PWD/mozc
           cd mozc
           sudo -u nonroot git worktree add tmp
