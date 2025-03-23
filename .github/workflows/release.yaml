@@ -237,7 +237,7 @@ jobs:
         run: |
           pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang ibus bazel mold sccache rustup --noconfirm --needed
           #sudo rm /usr/sbin/mold /usr/bin/ld.mold /usr/bin/mold -f
-          curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-x86_64-linux.tar.gz
+          curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.37.1/mold-2.37.1-x86_64-linux.tar.gz
           tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
           hash -r
           which mold
