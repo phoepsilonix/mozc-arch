@@ -9,14 +9,14 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=706f334bc5cc139acc486170b67de37c0ef90d16
-_bcr_commit=9e44cf3956ce475a94519da09a64b505facc90ff
+_mozc_commit=5e98feb8931508f4e20eb400dfd1a3be066d7280
+_bcr_commit=e2f0802e9fb502fc7765b88dd1be3e21d2d5bfe9
 _branch=fcitx
 
 pkgbase=mozc
 pkgname=("fcitx-$pkgbase")
 pkgver=2.31.5712.102
-pkgrel=38
+pkgrel=39
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
@@ -25,8 +25,8 @@ options=(!lto)
 source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         "bcr::git+https://github.com/bazelbuild/bazel-central-registry.git#commit=${_bcr_commit}")
 
-sha512sums=('66b9fef07de1ad3c8ddce0ab594773c0ba6371626fd75e802207ad4a6927ade622af718af276fa4fff13d1d75cdc8f7f488e89fa35be329b9a0cd94c32bd3d7d'
-            'dd3e1cb9ad8f8e5e513ae7354bc22a6beeeae1180173c3bf46000723f2d7091f74c6d529580b8c6e8423d28eb8b8ef943f0ac742fad228bb2b689cb8492bdded')
+sha512sums=('4fd2d963eac5b2cba31b2ea17fc3fa1ae245c06c802b055d24e56882ad91005ac0fcfcbdd4b4d86206ae77aabbc42bc58f065de9444c32f2029d26822be941f9'
+            'dafcaf3531eb91c0bb534f193f3fe7ccfb170c982a41c1672c2466b818026f4bb102a2bd111342c843f1a59fd30789cf6e58b026e258a8651781cb52cfc1bddb')
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
