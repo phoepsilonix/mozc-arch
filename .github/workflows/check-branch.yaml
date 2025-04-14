@@ -85,6 +85,11 @@ jobs:
             echo "should_exit=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+          if [[ "$FCITX_COMMIT" == "null" ]]; then
+            echo "Server or Network Error. Exiting."
+            echo "should_exit=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
       - name: Mozc Version Check
         id: check_mozc
