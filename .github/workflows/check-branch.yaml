@@ -127,6 +127,8 @@ jobs:
             git checkout main
             git clone --filter=tree:0 https://github.com/$ORIGINAL_REPO source
             cd source
+            echo "$OSS_COMMIT"
+            echo ${MOZC_TAG_2}
             git tag ${MOZC_TAG_2} $OSS_COMMIT || true
             git push origin ${MOZC_TAG_2} ||true
             cd ..

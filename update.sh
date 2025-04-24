@@ -37,21 +37,22 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
     echo "Change Detected."
     pushd .
     cd $1
-    sudo -u nonroot git clone --filter=tree:0 -b fcitx --mirror https://github.com/fcitx/mozc.git mozc
+    sudo -u nonroot git clone --filter=tree:0 --mirror https://github.com/fcitx/mozc.git mozc
     cd mozc
     sudo -u nonroot git worktree add tmp
     sudo -u nonroot git worktree remove tmp
     sudo -u nonroot git branch -d tmp
-	sudo -u nonroot git clone mozc src/
-	cd src/mozc/
+	cd ..
+	sudo -u nonroot git clone mozc src/mozc
+	cd src/mozc
+	sudo -u nonroot git checkout fcitx
 	source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
 	PKG_VER=$(printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))")
     popd
-    grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"="
     PKG_REL=$(($(grep "^pkgrel" $1/PKGBUILD|cut -f2 -d"=")+1))
     echo $PKG_REL
     sudo -u nonroot sed -i 's|^pkgrel=.*$|pkgrel='"${PKG_REL}"'|' $1/PKGBUILD*
-    PKG_VER_=$(($(grep "^pkgver" $1/PKGBUILD|cut -f2 -d"=")+1))
+    PKG_VER_=$(grep "^pkgver=" $1/PKGBUILD|cut -f2 -d"=")
 	echo $PKG_VER
 	echo $PKG_VER_
 	if [[ "$PKG_VER" != "$PKG_VER_" ]];then
