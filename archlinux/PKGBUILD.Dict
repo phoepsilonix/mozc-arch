@@ -88,10 +88,10 @@ prepare() {
   [ -z $TARGET ] && TARGET=$(rustup target list --installed | grep $(rustc -vV | sed -e 's|host: ||' -e 's|-gnu||p' -n)|head -n1)
   echo "target:" $TARGET
   unset RUSTC
-  #CC_=$CC
-  #unset CC
+  CC_=$CC
+  unset CC
   RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
-  #export CC=$CC_
+  export CC=$CC_
   # すだちを優先
   msg '2. Convert SudachiDict to Mozc System Dictionary format. It may take some time...'
   cat "${srcdir}"/mozc/src/data/dictionary_oss/dictionary*.txt > all-dict.txt
