@@ -300,7 +300,8 @@ jobs:
           sudo du -hd2 /github/workspace/.cache/
           sudo du -hd1 /github/workspace/.rustup/
           sudo du -hd1 /github/workspace/.cargo/
-          sudo rm -rf /github/workspace/.cache/*
+          # comment out when remove cache
+          #sudo rm -rf /github/workspace/.cache/*
 
       - name: Bazel check
         env:
