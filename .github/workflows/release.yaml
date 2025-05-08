@@ -94,12 +94,12 @@ jobs:
           export CC=clang
           export CXX=clang++
           export LD=ld.mold
-          #echo "export PATH=$PATH" |sudo tee -a /etc/environment
-          #echo "export CC=$CC" |sudo tee -a /etc/environment
-          #echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
-          #echo "export CXX=$CXX" |sudo tee -a /etc/environment
-          #echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
-          #echo "export LD=$LD" |sudo tee -a /etc/environment
+          echo "export PATH=$PATH" |sudo tee -a /etc/environment
+          echo "export CC=$CC" |sudo tee -a /etc/environment
+          echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
+          echo "export CXX=$CXX" |sudo tee -a /etc/environment
+          echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
+          echo "export LD=$LD" |sudo tee -a /etc/environment
           whoami
           id
           source /etc/makepkg.conf
