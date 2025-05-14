@@ -116,6 +116,10 @@ jobs:
           echo $LDFLAGS
           echo "Defaults    timestamp_timeout=30"|sudo tee -a /etc/sudoers
         
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_REPO_SSH_KEY }}
+
       - name: Setup Mozc source for Tag
         run: |
           git clone --filter=tree:0 https://github.com/phoepsilonix/mozc.git source
