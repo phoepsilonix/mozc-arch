@@ -65,15 +65,22 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE
           COMMIT=$(grep "^_mozc_commit" ${{ matrix.os }}/PKGBUILD|cut -f2 -d"=")
           TAG=${GITHUB_REF##*/}
+          echo $TAG
+          echo $COMMIT
           if [[ $TAG == "main" ]];then
             echo "Running release for branch: ${{ github.event.client_payload.repo.branch }}"
             echo "Tag: ${{ github.event.client_payload.repo.tag }}"
             TAG="${{ github.event.client_payload.repo.tag }}"
           fi
           NEW_COMMIT=${TAG#commit-}
-          if [[ "$COMMIT" != "$NEW_COMMIT" ]]; then
-            git push origin $TAG -d || true
-            exit 1
+          echo $NEW_COMMIT
+          if [[ "$TAG" =~ ^v ]]; then
+            echo $TAG
+          else
+            if [[ "$COMMIT" != "$NEW_COMMIT" ]]; then
+              git push origin $TAG -d || true
+              exit 1
+            fi
           fi
       - name: Setup non-root user
         run: |
@@ -185,6 +192,30 @@ jobs:
             echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
             echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
             echo "tag_commit=$(git log -1 --pretty=%H ${TAG})" >> $GITHUB_OUTPUT
+            echo "base_tag=${base_tag}" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" =~ ^v ]]; then
+            echo $TAG
+            tag=$TAG
+            base_tag="${tag%%-*}"
+            TAG=${base_tag}-${{ matrix.os }}
+            TAG2=${base_tag}-${{ matrix.os }}-with-jp-dict
+            TAG=${TAG%*-}
+            TAG2=${TAG2%*-}
+            git tag $TAG -d ||true
+            git tag $TAG2 -d ||true
+            git push origin $TAG -d ||true
+            git push origin $TAG2 -d ||true
+            git tag $TAG
+            git tag $TAG2
+            git push origin $TAG
+            git push origin $TAG2
+            cd source
+            COMMIT=$(git log -1 --pretty=%H $base_tag)
+            echo $COMMIT
+            git checkout $COMMIT
+            echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
+            echo "tag_name_2=${TAG2}" >> $GITHUB_OUTPUT
+            echo "tag_commit=$(git log -1 --pretty=%H ${COMMIT})" >> $GITHUB_OUTPUT
             echo "base_tag=${base_tag}" >> $GITHUB_OUTPUT
           else
             echo $TAG
