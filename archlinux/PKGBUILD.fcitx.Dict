@@ -124,7 +124,7 @@ build() {
   CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
   # for bazelisk
-  export USE_BAZEL_VERSION=8.2.1
+  #export USE_BAZEL_VERSION=8.2.1
 
   # The bazel rules have changed, so the cache will be deleted.
   #bazel clean --expunge
