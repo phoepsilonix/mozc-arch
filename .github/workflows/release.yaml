@@ -277,11 +277,11 @@ jobs:
 
       - name: Install bazel
         env:
-          USE_BAZEL_VERSION: "8.3.1"
+          USE_BAZEL_VERSION: "8.4.1"
         run: |
           mkdir -p /usr/local/bin
           curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.25.0/bazelisk-linux-amd64
-          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/8.3.1/bazel-8.3.1-linux-x86_64
+          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/8.4.1/bazel-8.4.1-linux-x86_64
           chmod +x /usr/local/bin/bazel
           #sudo chown -R root:root /github/workspace/.cache
           # remove cache
@@ -336,13 +336,13 @@ jobs:
 
       - name: Bazel check
         env:
-          USE_BAZEL_VERSION: "8.3.1"
+          USE_BAZEL_VERSION: "8.4.1"
         run: |
           sudo -u nonroot bazel --version
 
       - name: Build with Dict(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
-          USE_BAZEL_VERSION: "8.3.1"
+          USE_BAZEL_VERSION: "8.4.1"
         shell: bash
         run: |
           #. "/github/workspace/.cargo/env"
@@ -391,7 +391,7 @@ jobs:
 
       - name: Build normal pkg(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         env:
-          USE_BAZEL_VERSION: "8.3.1"
+          USE_BAZEL_VERSION: "8.4.1"
         shell: bash
         run: |
           #. "/github/workspace/.cargo/env"
