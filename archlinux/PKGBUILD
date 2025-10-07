@@ -9,14 +9,14 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=78ab4e66fce46821b95d6695871b3cbf5840792c
-_bcr_commit=33f4d40bba641b1542b449afe50cd3033b716175
+_mozc_commit=20ac5be8c78e48f37c68ff55c1cd17db1423b1cb
+_bcr_commit=11e6e2c342bde90ddc913f9828ac42fe812857a7
 _branch=fcitx
 
 pkgbase=mozc
 pkgname=("ibus-$pkgbase" "fcitx5-$pkgbase" "emacs-$pkgbase")
 pkgver=2.31.5851.102
-pkgrel=38
+pkgrel=39
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
@@ -27,8 +27,8 @@ source=("git+$url.git#commit=${_mozc_commit}"
         fcitx5-mozc-conf.patch
 )
 
-sha512sums=('a234ae46a2676a45b91fd9fb1b0569c24281ad76bde7fb432698a13fa7c8aa784daefb76ec4113a297cc907a6e9b7c4be0be54e3e3171f297e0a3a51af3a1ed3'
-            '3f0f6232fc1bcf17ee4203698529ff89fea76c400e6c3b1d3f4f43b76052484f40468d861adb6833dfa712a433cd2dce87b70e91ef6a41f03059dfacb0cdebc4'
+sha512sums=('7222993497cdba452b66445a9e8beab05c80318a07569f1d9d3623c190f3662636fbeb91a2f5392926dbc8da10b24c6c90a5e17e9d4ad1fd87054569b72b605d'
+            '1742fe40c08946737f5321e7f66c8a6b8ab92ea72643016c85b692518cdae426819d86d4f9f5160881b6c209496277f9971da5a916d4f323969ac30a979549f3'
             'd964584b7b2ffaa031d527bf4e8c53e2aadffc87c073b5d87841172ad8fc0ea7b341161bac84b3c0df2ab7df8dff4655087a45debb2ec3839f2743e253f115e3')
 
 pkgver() {
