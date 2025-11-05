@@ -68,6 +68,7 @@ if [[ "$SudachiDict_DATE" != "$SUDACHI_DATE" ]];then
     eval $(sudo -u nonroot makepkg -g -p PKGBUILD.Dict)
     #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD.Dict | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.Dict ${sha512sums[@]}
+    eval $(sudo -u phoepsilonix makepkg -gdoe --noprepare -p PKGBUILD.fcitx.Dict)
     sudo -u nonroot ../update_sha512sums.sh PKGBUILD.fcitx.Dict ${sha512sums[@]}
     cd ..
     git commit -a -m "SudachiDict Update($1) _sudachidict_date=$SudachiDict_DATE"
