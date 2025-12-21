@@ -375,9 +375,10 @@ jobs:
           export LD=ld.mold
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict || sudo rm -rf ${{ github.workspace }}/.cache/bazel/* && sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
-          pacman -R fcitx5 fcitx5-qt --noconfirm
-          pacman -S fcitx fcitx-qt6 --noconfirm --needed
-          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
+          # Removed fcitx
+          #pacman -R fcitx5 fcitx5-qt --noconfirm
+          #pacman -S fcitx fcitx-qt6 --noconfirm --needed
+          #sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx.Dict
           sudo -u nonroot mkdir -p ../release_2
           sudo -u nonroot mv *.pkg.tar.zst ../release_2/
           #chown -R root:root ../
@@ -402,9 +403,10 @@ jobs:
           #pacman -S fcitx fcitx-qt6 --noconfirm --needed
           (cd src/mozc;sudo -u nonroot git checkout src/data/dictionary_oss/dictionary*.txt)
           #sudo -u nonroot makepkg -osC -p PKGBUILD.fcitx --noconfirm
-          sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
-          pacman -R fcitx fcitx-qt6 --noconfirm
-          pacman -S fcitx5 fcitx5-qt --noconfirm --needed
+          # Removed fcitx
+          #sudo -u nonroot makepkg -ef -p PKGBUILD.fcitx
+          #pacman -R fcitx fcitx-qt6 --noconfirm
+          #pacman -S fcitx5 fcitx5-qt --noconfirm --needed
           sudo -u nonroot makepkg -ef -p PKGBUILD
           sudo -u nonroot mkdir -p ../release
           sudo -u nonroot mv *.pkg.tar.zst ../release/
