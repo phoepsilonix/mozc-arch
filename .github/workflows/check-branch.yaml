@@ -29,6 +29,7 @@ jobs:
     steps:
       - name: Install Git and Ssh and GPG
         run: |
+          pacman -Syu --noconfirm --needed archlinux-keyring
           pacman -Syu --noconfirm --needed git openssh gnupg
           export GPG_TTY=$(tty)
           gpg-agent --daemon
