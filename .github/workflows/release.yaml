@@ -36,6 +36,13 @@ jobs:
         run: |
           echo "Event name: ${{ github.event_name }}"
           echo "Event payload: ${{ toJson(github.event.client_payload) }}"
+      - name: keyring install
+        run: | 
+          pacman -Sy --noconfirm --needed  archlinux-keyring
+      - name: keyring install(manjaro)
+        if: matrix.os == 'manjarolinux'
+        run: | 
+          pacman -Sy --noconfirm --needed  manjaro-keyring
       - name: install sudo and git (Linux)
         id: startup
         shell: bash
