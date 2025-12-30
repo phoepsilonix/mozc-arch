@@ -57,7 +57,7 @@ sha512sums=('4706f37a3c922c1a0541a2c79fce2cb68bef1b1d0f3f601015a7de6e02ee1e7e81d
 
 pkgver() {
   cd "${srcdir}/mozc" || exit
-  source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ')
+  source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ' | grep -v DEFAULT_BUILD_LABEL_MACOS)
   printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))"
 }
 
