@@ -13,6 +13,7 @@ BCR_COMMIT=$(curl -s https://api.github.com/repos/$BCR_REPO/commits/main|jq -r "
 echo $FCITX5_MOZC_COMMIT
 echo $SudachiDict_DATE
 echo $BCR_COMMIT
+MOZC_TAG_COMMIT=$(cat tag_commit.txt)
 
 # PKGBUILD
 COMMIT=$(grep "^_mozc_commit" $1/PKGBUILD|cut -f2 -d"=")
@@ -78,6 +79,7 @@ fi
 if [[ "$COMMIT" != "$FCITX5_MOZC_COMMIT" ]]; then
     cd $1
     sudo -u nonroot sed -i 's|^_mozc_commit=.*$|_mozc_commit='"${FCITX5_MOZC_COMMIT}"'|' PKGBUILD*
+    sudo -u nonroot sed -i 's|^_mozc_tag_commit=.*$|_mozc_tag_commit='"${MOZC_TAG_COMMIT}"'|' PKGBUILD*
     sudo -u nonroot sed -i 's|^_bcr_commit=.*$|_bcr_commit='"${BCR_COMMIT}"'|' PKGBUILD*
     eval $(sudo -u nonroot makepkg -gde --noprepare -p PKGBUILD)
     #mapfile -t sha512sums < <(sudo -u nonroot makepkg -g -p PKGBUILD | sed "s/sha512sums=(//" | sed "s/)$//" | tr -d "'")

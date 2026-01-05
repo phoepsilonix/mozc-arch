@@ -134,6 +134,23 @@ jobs:
             echo ${MOZC_TAG_2}
             git tag ${MOZC_TAG_2} $OSS_COMMIT || true
             git push origin ${MOZC_TAG_2} ||true
+
+            # tag commit
+            # TAG_COMMIT=d9c3f195582de6b0baa07ecb81a04e8902acf9af
+            TARGET_BRANCH=fcitx
+
+            git log --merges --reverse --ancestry-path --format='%H %P' ${TAG_COMMIT}..${TARGET_BRANCH} \
+            | while read m p1 p2; do
+            # このマージのどちらかの親から TAG_COMMIT に到達できるかを調べる
+              if git merge-base --is-ancestor ${TAG_COMMIT} ${p1} ||
+                  git merge-base --is-ancestor ${TAG_COMMIT} ${p2}; then
+                  echo ${m}
+                  echo ${m} > tag_commit.txt
+              break
+              fi
+            done
+
+
             cd ..
           fi
 
