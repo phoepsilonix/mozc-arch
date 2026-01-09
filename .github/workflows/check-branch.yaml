@@ -27,9 +27,15 @@ jobs:
       mozc_tag: ${{ steps.check_mozc.outputs.mozc_tag }}
 
     steps:
+      - name: keyring install
+        run: | 
+          pacman -Sy --noconfirm --needed  archlinux-keyring
+      - name: keyring install(manjaro)
+        if: matrix.os == 'manjarolinux'
+        run: | 
+          pacman -Sy --noconfirm --needed  manjaro-keyring
       - name: Install Git and Ssh and GPG
         run: |
-          pacman -Sy --noconfirm --needed archlinux-keyring
           pacman -Syu --noconfirm --needed git openssh gnupg
           export GPG_TTY=$(tty)
           gpg-agent --daemon
