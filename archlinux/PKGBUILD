@@ -10,9 +10,6 @@
 ## Mozc compile option
 _bldtype=Release
 _mozc_commit=f9feca5e986ed1a874e6f86122ecc48808a57b1a
-# For pkgver(commmit of fcitx branch)
-_mozc_tag_commit=6c54b5d52a3a9d949502ad8e6c2eab2c66e7f1a7
-
 _bcr_commit=848725b308daca44cbed3183d30bed879cca3e52
 _branch=fcitx
 
@@ -39,10 +36,9 @@ pkgver() {
   # change pkgver is OK because we fixed commit
   # parse major.minor.buildid from version template, revision is fixed to 102 for Linux
   source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' src/data/version/mozc_version_template.bzl | tr -d ' ')
+  _mozc_commit_short=$(git log -1 --pretty=%h)
   _bzr_ver="$MAJOR.$MINOR.$BUILD_OSS.102"
-  # Ensure version numbers comply with the VCS package guidelines.
-  _commit_count=$(($(git rev-list --count ${_mozc_commit})-$(git rev-list --count ${_mozc_tag_commit})))
-  printf "%s.r%s.g%s" "${_bzr_ver}" "${_commit_count}" "$(git rev-parse --short=7 ${_mozc_commit})"
+  printf "%s.g%s" "${_bzr_ver}" "${_mozc_commit_short}"
 }
 
 prepare() {
