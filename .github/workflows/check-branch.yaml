@@ -114,10 +114,8 @@ jobs:
           MOZC_TAG_1="v""$(grep "^pkgver" archlinux/PKGBUILD|head -n1| cut -f2 -d'=')"
           echo "Resetting local master to FETCH_HEAD..."
           git checkout FETCH_HEAD
-          #source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ' | grep -v DEFAULT_BUILD_LABEL_MACOS)
-          source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' src/data/version/mozc_version_template.bzl | tr -d ' ')
+          source <(grep = src/data/version/mozc_version_template.bzl| tr -d ' ' | grep -v DEFAULT_BUILD_LABEL_MACOS)
           MOZC_TAG_2=$(printf "v%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))")
-
           echo "$MOZC_TAG_1"
           echo "$MOZC_TAG_2"
           if [[ "$MOZC_TAG_1" != "$MOZC_TAG_2" ]];then
