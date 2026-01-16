@@ -18,7 +18,7 @@ _sudachidict_date=20251022
 
 pkgbase=mozc-with-jp-dict
 pkgname=("fcitx-$pkgbase")
-pkgver=3.33.6079.102
+pkgver=3.33.6079.2
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
@@ -54,9 +54,16 @@ sha512sums=('2a2f9840a981dddc9d9cc42647435b1b88999a7cb1a96c7f1f7cac5c2f9a8cd06a0
             '77a8c1d76a53627f8680f761f9c996b04e6b609bdb813cb5aedc7f8214d9b5f13aea53788814029f6f1e263c50ecb58feb5999e95d51fe7e4707b6a913d4bbe4')
 
 pkgver() {
-  cd "${srcdir}/mozc" || exit
-  source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' src/data/version/mozc_version_template.bzl | tr -d ' ')
-  printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$((REVISION+2))"
+  cd "${srcdir}/mozc/src" || exit
+  # https://github.com/google/mozc/discussions/1429
+  # REVISION in mozc_version_template.bzl is no longer used by Bazel builds.
+  # REVISION will be probably removed once GYP builds are completely removed.
+  # future: stable_channel 
+  # bazel build --config oss_linux --config stable_channel base:mozc_version_txt >/dev/null 2>&1
+  bazel build --config oss_linux base:mozc_version_txt >/dev/null 2>&1
+  source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' bazel-bin/base/mozc_version.txt)
+   _bzr_ver="$MAJOR.$MINOR.$BUILD_OSS.$REVISION"
+  printf "%s" "${_bzr_ver}"
 }
 
 prepare() {
