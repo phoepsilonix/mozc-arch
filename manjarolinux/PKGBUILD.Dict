@@ -11,7 +11,7 @@
 _bldtype=Release
 _mozc_commit=02c2c7d9733ef46eb60a208f2c7877a5d3a1f16c
 _bcr_commit=dfc99fe1795739a867d12a7aee3d861b4ea0c447
-_dict_to_mozc_commit=fb9f38e297c73a52b807007225b7c01c2530b0c6
+_dict_to_mozc_commit=cad5cefbb541f4184547241fd35905eb8ba8a81c
 _branch=fcitx
 # Sudachi Dictionary
 _sudachidict_date=20251022
@@ -44,7 +44,7 @@ source=("git+$url.git#commit=${_mozc_commit}"
 
 sha512sums=('2a2f9840a981dddc9d9cc42647435b1b88999a7cb1a96c7f1f7cac5c2f9a8cd06a0928376008a426b2c552f603857b3de9a466fe60bf9b17ea69bdccd8379a43'
             'f72aa05770ee2e54ed7eb1a56152700cd540dba8bfcfdc2712552e681750d8641130f36b6334a0a5dbdad693cdf0b83f82ed64c56c2a0c33f4ad6e5b93160c7b'
-            'd359ab1e82d68dc9d96a1a38bd58d5df7a5bc5084b04171f09d82fef086af542d65f14dc4775fb0ab4bd9f49034f2901928004b433cff53c6411c4986d17c447'
+            '3758e8a1a6085acd78bbff721601aafa37bdaabcc681223c66848e6e381aaf1a54e3e731fd937b008582bc621d6a3174392cd3155e666197e090a4169c861dfd'
             'c93441657d787c3fc8635f65c190368d94216df6167596b315b78d02fd4abd14c85895c09d2e40d639b3808105ffd1901110aff6e9b8beaad4f609513caaec36'
             'eda980d6065dee5cd571370d12599358c0e8559dd797e86b07a345dbadabc1f1c26c6d2bdddc02cfe56f0c310180b21df3d8a479e28ff5ca2f2e0ac2e6b60d42'
             'd819e284447e52dcf0c721dc8ac267c43e93f93d02949263d91dc496804a33e966943c473dccfe8ee85ce21657ddb08d56dcec0d8e0a49f6eddc5a80929ced63'
@@ -60,9 +60,7 @@ pkgver() {
   # https://github.com/google/mozc/discussions/1429
   # REVISION in mozc_version_template.bzl is no longer used by Bazel builds.
   # REVISION will be probably removed once GYP builds are completely removed.
-  # future: stable_channel 
-  # bazel build --config oss_linux --config stable_channel base:mozc_version_txt >/dev/null 2>&1
-  bazel build --config oss_linux base:mozc_version_txt >/dev/null 2>&1
+  bazel build --config oss_linux --config stable_channel base:mozc_version_txt >/dev/null 2>&1
   source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' bazel-bin/base/mozc_version.txt)
    _bzr_ver="$MAJOR.$MINOR.$BUILD_OSS.$REVISION"
   printf "%s" "${_bzr_ver}"
@@ -145,6 +143,7 @@ build() {
   # Pass them with --cxxopt, and --linkopt.
   ../scripts/build_fcitx5_bazel \
       --config release_build \
+      --config stable_channel \
       --registry="file://${srcdir}/bcr" \
       $(echo "${CFLAGS}"|xargs -n1 echo "--copt") \
       $(echo "${CXXFLAGS}"|xargs -n1 echo "--cxxopt") \
