@@ -92,21 +92,11 @@ prepare() {
   msg '1. Build the rust program(dict-to-mozc), it may take some time...'
   TARGETS=$(rustc -vV | sed -n 's|^host: \([^-]*-[^-]*-[^-]*\)-gnu$|\1|p'); TARGETS=$(rustup target list --installed | grep "$TARGETS"); : "${TARGET:=$(echo "$TARGETS" | grep -v musl | head -n1)}" "${TARGET:=$(echo "$TARGETS" | grep musl | head -n1)}"
   : "${TARGET:=$(rustc -vV | sed -n 's/^host: //p')}"
-  echo $RUSTC
   unset RUSTC
-  CC_=$CC
-  CFLAGS_=$CFLAGS
-  unset CC
   : "${CC:=$(command -v clang || command -v gcc)}"
-  export CC
-  unset CFLAGS
-  expr "$CC" : ".*gcc" >/dev/null && : "${CFLAGS:=-std=c11 -Bmold -Wno-implicit-function-declaration -Wno-error=implicit-function-declaration}"
-  echo $CC
-  echo $CFLAGS
-  export CFLAGS
-  CC="$CC" CFLAGS="$CFLAGS" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
-  export CC=$CC_
-  export CFLAGS=$CFLAGS_
+  # warning of mimalloc-rust-sys@1.7.9-source
+  expr "$CC" : ".*gcc" >/dev/null && : "${CFLAGS_:=-std=c11 -Bmold -Wno-implicit-function-declaration -Wno-error=implicit-function-declaration}"
+  CC="$CC" CFLAGS="$CFLAGS_" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
   # すだちを優先
   msg '2. Convert SudachiDict to Mozc System Dictionary format. It may take some time...'
   cat "${srcdir}"/mozc/src/data/dictionary_oss/dictionary*.txt > all-dict.txt
