@@ -46,7 +46,7 @@ if [[ "$UPDATED_FLAG" == "1" ]]; then
 	sudo -u nonroot git clone mozc src/mozc
 	cd src/mozc/src
 	sudo -u nonroot git checkout fcitx
-        bazel build --config oss_linux --config stable_channel base:mozc_version_txt >/dev/null 2>&1
+        bazelisk build --config oss_linux --config stable_channel base:mozc_version_txt >/dev/null 2>&1
         source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' bazel-bin/base/mozc_version.txt)
 	PKG_VER=$(printf "%s.%s.%s.%s" "$MAJOR" "$MINOR" "$BUILD_OSS" "$REVISION")
     popd

@@ -273,7 +273,7 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang ibus bazel mold sccache rustup --noconfirm --needed
+          pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang ibus bazelisk mold sccache rustup --noconfirm --needed
           #sudo rm /usr/sbin/mold /usr/bin/ld.mold /usr/bin/mold -f
           #curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.40.4/mold-2.40.4-x86_64-linux.tar.gz
           #tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
@@ -282,17 +282,17 @@ jobs:
           mold --version
           ld.mold --version
 
-      - name: Install bazel
+      - name: initialize of bazel cache
         run: |
           mkdir -p /usr/local/bin
-          curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.28.0/bazelisk-linux-amd64
+          #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.28.0/bazelisk-linux-amd64
           #curl -Lo /usr/local/bin/bazel https://github.com/bazelbuild/bazel/releases/download/8.4.1/bazel-8.4.1-linux-x86_64
-          chmod +x /usr/local/bin/bazel
+          #chmod +x /usr/local/bin/bazel
           #sudo chown -R root:root /github/workspace/.cache
           # remove cache
           sudo rm -rf /github/workspace/.cache/bazel/*
           sudo chown -R nonroot:nonroot /github/workspace/.cache
-          sudo -u nonroot bazel --version
+          #sudo -u nonroot bazelisk --version
           # for cache scope of branch
           #git checkout main
           #git config --global --add safe.directory .
@@ -339,9 +339,9 @@ jobs:
           # comment out when remove cache
           #sudo rm -rf /github/workspace/.cache/*
 
-      - name: Bazel check
-        run: |
-          sudo -u nonroot bazel --version
+      #- name: Bazel check
+      #  run: |
+      #    sudo -u nonroot bazelisk --version
 
       - name: Build with Dict(fcitx5-mozc ibus-mozc emacs fcitx-mozc)
         shell: bash
@@ -352,7 +352,7 @@ jobs:
           mold --version
           ld.mold --version
           sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
-          sudo -u nonroot bazel --version
+          #sudo -u nonroot bazelisk --version
           sudo -u nonroot ld.mold --version
           chown -R nonroot:nonroot .
           cd ${{ matrix.os }}
