@@ -153,20 +153,28 @@ jobs:
           fi
           if [[ "$TAG" =~ ^commit- ]]; then
             cd source
-            COMMIT=$(git log --merges --first-parent ${TAG#commit-} --pretty=%h -1)
-            COMMIT=$(git show -s --format=%P $COMMIT master -1|cut -f2 -d" ")
+            COMMIT="${TAG#commit-}"
+            SHORT_COMMIT=$(git log -1 --pretty=%h $COMMIT)
             git checkout $COMMIT
             echo $TAG
+            echo $SHORT_COMMIT
             cd ..
             #git tag $TAG -d
             #git push origin $TAG -d
             cd source
-            tag=$(git describe --tags --always ${COMMIT})
+            # tagの取得
+            # 例
+            # v2.30.5618.102-5904-g800742d
+            # v3.33.6079.2-17-g76cb1ce
+            # この場合17とg8000742dを使用する。
+            # コミットはfcitxの最終コミットを意味する。SHORT_COMMITを用いる。
+            # BUILD_OSSのベースのコミットからgoogleのmasterブランチで何コミット進んでいるかを示す数が、この場合は17。
+            # 5904はfcitxブランチのコミットの数が含まれるため用いない。
+            tag=$(git describe --always --tag --long ${COMMIT} origin/master --exclude="fcitx*" --match="v*"|grep -v $SHORT_COMMIT)
             base_tag="${tag%%-*}"
             if [[ "$tag" =~ "-" ]];then
-              after_tag="${tag#*-}"
-              FCITX_COMMIT=$(git rev-parse --short ${TAG#commit-})
-              after_tag="${after_tag%-*}"-g${FCITX_COMMIT}
+              tmp=${tag#*-}; num=${tmp%%-*}
+              after_tag="r$num-g$SHORT_COMMIT"
               echo $after_tag
               TAG=${base_tag}"-${{ matrix.os }}-"${after_tag}
               TAG2=${base_tag}"-${{ matrix.os }}-with-jp-dict-"${after_tag}
