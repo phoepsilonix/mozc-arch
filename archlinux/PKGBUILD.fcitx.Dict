@@ -90,7 +90,9 @@ prepare() {
   : "${CC:=$(command -v clang || command -v gcc)}"
   # warning of mimalloc-rust-sys@1.7.9-source
   expr "$CC" : ".*gcc" >/dev/null && : "${CFLAGS_:=-std=c11 -Bmold -Wno-implicit-function-declaration -Wno-error=implicit-function-declaration}"
-  CC="$CC" CFLAGS="$CFLAGS_" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-mimalloc-rs || cargo build --release --target $TARGET
+  CC="$CC" CFLAGS="$CFLAGS_" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-tcmalloc || \
+    CC="$CC" CFLAGS="$CFLAGS_" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET -F use-mimalloc-rs || \
+    CC="$CC" CFLAGS="$CFLAGS_" RUSTFLAGS="-Clink-arg=-Bmold" cargo build --release --target $TARGET
   # すだちを優先
   msg '2. Convert SudachiDict to Mozc System Dictionary format. It may take some time...'
   cat "${srcdir}"/mozc/src/data/dictionary_oss/dictionary*.txt > all-dict.txt
