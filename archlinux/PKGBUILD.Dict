@@ -104,11 +104,11 @@ prepare() {
   cat "${srcdir}"/mozc/src/data/dictionary_oss/dictionary*.txt > all-dict.txt
   cat ${srcdir}/small_lex.csv ${srcdir}/core_lex.csv ${srcdir}/notcore_lex.csv > all.csv
   cp ${srcdir}/mozc/src/data/dictionary_oss/id.def ./
-  ./target/$TARGET/release/dict-to-mozc -s -i ./id.def -f all.csv >> all-dict.txt
+  ./target/$TARGET/release/dict-to-mozc -D 1 -s -i ./id.def -f all.csv >> all-dict.txt
   msg '3. Convert MeCab-unidic-Neologd to Mozc System Dictionary format. It may take some time...'
-  ./target/$TARGET/release/dict-to-mozc -n -i ./id.def -f ${srcdir}/mecab-unidic-user-dict-seed.20200910.csv >> all-dict.txt
+  ./target/$TARGET/release/dict-to-mozc -D 1 -n -i ./id.def -f ${srcdir}/mecab-unidic-user-dict-seed.20200910.csv >> all-dict.txt
   msg '4. Convert MeCab-ipadic-Neologd to Mozc System Dictionary format. It may take some time...'
-  ./target/$TARGET/release/dict-to-mozc -n -P 12 -N 10 -i ./id.def -f ${srcdir}/mecab-user-dict-seed.20200910.csv >> all-dict.txt
+  ./target/$TARGET/release/dict-to-mozc -D 1 -n -P 12 -N 10 -i ./id.def -f ${srcdir}/mecab-user-dict-seed.20200910.csv >> all-dict.txt
   msg '5. Duplicate data will be removed.'
   # 読み、表記による重複チェック。件数を抑制するために、品詞IDを無視し、読みと表記のみで重複チェック。
   awk 'BEGIN{FS="\t";OFS="\t"}{if (!a[$1,$5]++) {print $0}}' all-dict.txt|sort > finish-dict-pre.txt
