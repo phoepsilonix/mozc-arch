@@ -49,7 +49,7 @@ prepare() {
   #sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
 
   # nm -f posix (llvm-nm -f posix)
-  sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
+  #sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
 
   # disable warning of ANDROID_NDK_HOME.
   sed -e '/register_toolchains("@androidndk\/\/:all")/d' -i MODULE.bazel

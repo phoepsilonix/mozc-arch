@@ -83,7 +83,7 @@ prepare() {
   sed -e '/register_toolchains("@androidndk\/\/:all")/d' -i MODULE.bazel
 
   # nm -f posix (llvm-nm -f posix)
-  sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
+  #sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
 
   cd "${srcdir}/dict-to-mozc/" || exit
   #sed -i -e "s|channel *=.*|channel = \"stable\"|" rust-toolchain.toml
