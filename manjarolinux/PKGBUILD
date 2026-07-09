@@ -60,7 +60,7 @@ prepare() {
   #sed -i -e "s/bazel /bazelisk /" ../scripts/build_fcitx_bazel
 
   # use libstdc++ instead of libc++
-  sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
+  #sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
 
   # nm -f posix (llvm-nm -f posix)
   sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py

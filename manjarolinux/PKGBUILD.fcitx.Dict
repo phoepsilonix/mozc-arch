@@ -73,7 +73,7 @@ prepare() {
   cd src || exit
 
   # use libstdc++ instead of libc++
-  sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
+  #sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
 
   # disable warning of ANDROID_NDK_HOME.
   sed -e '/register_toolchains("@androidndk\/\/:all")/d' -i MODULE.bazel
