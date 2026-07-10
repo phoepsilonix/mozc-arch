@@ -87,8 +87,6 @@ prepare() {
   SHA256_ZIP_CODE_KEN_ALL=$(sha256sum ken_all.zip | cut -d' ' -f1);
   SHA256_ZIP_CODE_JIGYOSYO=$(sha256sum jigyosyo.zip | cut -d' ' -f1);
   cd "$srcdir/mozc" || exit
-  git submodule update --init --recursive
-
   patch -p1 -i ${srcdir}/fcitx5-mozc-conf.patch
 
   cd "$srcdir/mozc"
