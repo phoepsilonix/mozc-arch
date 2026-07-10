@@ -121,7 +121,8 @@ prepare() {
 build() {
   cd "$srcdir/mozc/src" || exit
 
-  bazelisk build \
+  bazel --bazelrc=.bazelrc \
+      build \
       --config oss_linux \
       --config stable_channel \
       --config release_build \

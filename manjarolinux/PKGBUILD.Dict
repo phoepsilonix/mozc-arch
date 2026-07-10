@@ -154,7 +154,8 @@ build() {
 
   # bazel only respects CC from environment, not CXXFLAGS and LDFLAGS.
   # Pass them with --cxxopt, and --linkopt.
-  bazelisk build \
+  bazel --bazelrc=.bazelrc \
+      build \
       --config oss_linux \
       --config stable_channel \
       --config release_build \
