@@ -109,10 +109,10 @@ jobs:
           #export CXX=clang++
           export LD=ld.mold
           echo "export PATH=$PATH" |sudo tee -a /etc/environment
-          echo "export CC=$CC" |sudo tee -a /etc/environment
-          echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
-          echo "export CXX=$CXX" |sudo tee -a /etc/environment
-          echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
+          #echo "export CC=$CC" |sudo tee -a /etc/environment
+          #echo "export HOSTCC=$HOSTCC" |sudo tee -a /etc/environment
+          #echo "export CXX=$CXX" |sudo tee -a /etc/environment
+          #echo "export HOSTCXX=$HOSTCXX" |sudo tee -a /etc/environment
           echo "export LD=$LD" |sudo tee -a /etc/environment
           whoami
           id
@@ -267,6 +267,7 @@ jobs:
           echo "fcitx5_mozc_pkgver=$PKGVER" >> $GITHUB_OUTPUT
           echo "fcitx5_mozc_pkgrel=$PKGREL" >> $GITHUB_OUTPUT
           echo "fcitx5_mozc_pkgrel_=$((PKGREL-1))" >> $GITHUB_OUTPUT
+          echo "ANDROID_NDK_HOME=" >> $GITHUB_ENV
 
       - name: check variables
         run: |
@@ -347,6 +348,7 @@ jobs:
           # comment out when remove cache
           #sudo rm -rf /github/workspace/.cache/*
 
+
       #- name: Bazel check
       #  run: |
       #    sudo -u nonroot bazelisk --version
@@ -357,6 +359,7 @@ jobs:
           #. "/github/workspace/.cargo/env"
           hash -r
           which mold
+          echo "ANDROID_NDK_HOME=" >> $GITHUB_ENV
           mold --version
           ld.mold --version
           sudo -u nonroot env|grep -E "PATH|CC|CXX|LD|CFLAGS|CXXFLAGS|LDFLAGS|CPPFLAGS"
