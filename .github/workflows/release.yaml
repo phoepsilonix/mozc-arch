@@ -278,6 +278,7 @@ jobs:
           #echo "${{ steps.variables.outputs.fcitx5_mozc_checksum }}"
           echo "${{ steps.variables.outputs.fcitx5_mozc_pkgver }}"
           echo "${{ steps.variables.outputs.fcitx5_mozc_pkgrel }}"
+          grep "compiler_gcc_like" src/mozc/.bazelrc || true
 
       - name: install build tools (Linux)
         shell: bash
