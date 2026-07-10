@@ -60,26 +60,22 @@ pkgver() {
   # https://github.com/google/mozc/discussions/1429
   # REVISION in mozc_version_template.bzl is no longer used by Bazel builds.
   # REVISION will be probably removed once GYP builds are completely removed.
-  bazel build --config oss_linux --config stable_channel --config release_build base:mozc_version_txt >/dev/null 2>&1
+  bazel build --config oss_linux --config stable_channel --config release_build --config no_sframe base:mozc_version_txt >/dev/null 2>&1
   source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' bazel-bin/base/mozc_version.txt)
    _bzr_ver="$MAJOR.$MINOR.$BUILD_OSS.$REVISION"
   printf "%s" "${_bzr_ver}"
 }
 
 prepare() {
-  cd "$srcdir/mozc" || exit
+  SHA256_ZIP_CODE_KEN_ALL=$(sha256sum ken_all.zip | cut -d' ' -f1);
+  SHA256_ZIP_CODE_JIGYOSYO=$(sha256sum jigyosyo.zip | cut -d' ' -f1);
+  cd "$srcdir/mozc"
   git submodule update --init --recursive
 
-  cd src || exit
-
-  # use libstdc++ instead of libc++
-  #sed '/stdlib=libc++/d;/-lc++/d' -i gyp/common.gypi
-
-  # disable warning of ANDROID_NDK_HOME.
-  sed -e '/register_toolchains("@androidndk\/\/:all")/d' -i MODULE.bazel
-
-  # nm -f posix (llvm-nm -f posix)
-  #sed 's|nm \(.*\)\-f p |nm \1-f posix |' -i third_party/gyp/pylib/gyp/generator/ninja.py
+  # bazel will always download file without checksum, set checksum so bazel will not download it.
+  sed -e "s|SHA256_ZIP_CODE_KEN_ALL = \(.*\)|SHA256_ZIP_CODE_KEN_ALL = \"${SHA256_ZIP_CODE_KEN_ALL}\"|" \
+      -e "s|SHA256_ZIP_CODE_JIGYOSYO = \(.*\)|SHA256_ZIP_CODE_JIGYOSYO = \"${SHA256_ZIP_CODE_JIGYOSYO}\"|" \
+      -i src/config.bzl src/MODULE.bazel
 
   cd "${srcdir}/dict-to-mozc/" || exit
   #sed -i -e "s|channel *=.*|channel = \"stable\"|" rust-toolchain.toml
@@ -127,29 +123,21 @@ prepare() {
 build() {
   cd "$srcdir/mozc/src" || exit
 
-  # Fix compatibility with google-glog 0.3.3 (symbol conflict)
-  CFLAGS="${CFLAGS} -fvisibility=hidden"
-  CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
-
-  # The bazel rules have changed, so the cache will be deleted.
-  #bazel clean --expunge
-
-  # fcitx4
-  # unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool
-  #env _BUILD_TARGETS="unix/fcitx:fcitx-mozc.so server:mozc_server gui/tool:mozc_tool" \
-  #
-  # bazel only respects CC from environment, not CXXFLAGS and LDFLAGS.
-  # Pass them with --cxxopt, and --linkopt.
-  ../scripts/build_fcitx_bazel \
-      --config release_build \
+  bazel build \
+      --config oss_linux \
       --config stable_channel \
+      --config release_build \
+      --config no_sframe \
       --registry="file://${srcdir}/bcr" \
-      $(echo "${CFLAGS}"|xargs -n1 echo "--copt") \
+      --copt=-DNDEBUG \
+      $(echo "${CFLAGS}"|xargs -n1 echo "--conlyopt") \
       $(echo "${CXXFLAGS}"|xargs -n1 echo "--cxxopt") \
-      --linkopt=-fuse-ld=mold \
+      --nostart_end_lib \
+      --linkopt=-fuse-ld=bfd \
       $(echo "${LDFLAGS}"|xargs -n1 echo "--linkopt") \
       --copt="-Wno-uninitialized" \
       --host_copt="-Wno-uninitialized" --verbose_failures \
+      package
 
   bazel shutdown
 }
