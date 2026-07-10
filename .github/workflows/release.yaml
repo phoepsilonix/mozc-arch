@@ -103,10 +103,10 @@ jobs:
           sudo -u nonroot whoami
           sudo -u nonroot id
           PATH=/usr/local/bin:$PATH
-          export HOSTCC=clang
-          export HOSTCXX=clang++
-          export CC=clang
-          export CXX=clang++
+          #export HOSTCC=clang
+          #export HOSTCXX=clang++
+          #export CC=clang
+          #export CXX=clang++
           export LD=ld.mold
           echo "export PATH=$PATH" |sudo tee -a /etc/environment
           echo "export CC=$CC" |sudo tee -a /etc/environment
@@ -281,7 +281,7 @@ jobs:
       - name: install build tools (Linux)
         shell: bash
         run: |
-          pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang ibus bazelisk mold sccache rustup unzip --noconfirm --needed
+          pacman -S base-devel fakeroot qt6-base python python-six pkg-config wget curl mesa llvm clang gcc ibus bazelisk mold sccache rustup unzip --noconfirm --needed
           #sudo rm /usr/sbin/mold /usr/bin/ld.mold /usr/bin/mold -f
           #curl -Lo mold.tar.gz https://github.com/rui314/mold/releases/download/v2.40.4/mold-2.40.4-x86_64-linux.tar.gz
           #tar -xf mold.tar.gz --strip-component=1 -C /usr/local/
@@ -383,10 +383,10 @@ jobs:
           chown -R nonroot:nonroot /github/workspace/.cargo
           #pacman -R fcitx fcitx-qt6 --noconfirm || true
           pacman -S fcitx5 fcitx5-qt --noconfirm --needed
-          export HOSTCC=clang
-          export HOSTCXX=clang++
-          export CC=clang
-          export CXX=clang++
+          #export HOSTCC=clang
+          #export HOSTCXX=clang++
+          #export CC=clang
+          #export CXX=clang++
           export LD=ld.mold
           sudo -u nonroot makepkg -osC -p PKGBUILD.Dict
           sudo -u nonroot makepkg -ef -p PKGBUILD.Dict || sudo rm -rf ${{ github.workspace }}/.cache/bazel/* && sudo -u nonroot makepkg -ef -p PKGBUILD.Dict
@@ -403,10 +403,10 @@ jobs:
         shell: bash
         run: |
           #. "/github/workspace/.cargo/env"
-          export HOSTCC=clang
-          export HOSTCXX=clang++
-          export CC=clang
-          export CXX=clang++
+          #export HOSTCC=clang
+          #export HOSTCXX=clang++
+          #export CC=clang
+          #export CXX=clang++
           export LD=ld.mold
           hash -r
           which mold
