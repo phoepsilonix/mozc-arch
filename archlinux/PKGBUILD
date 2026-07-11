@@ -92,8 +92,6 @@ build() {
       --copt="-Wno-uninitialized" \
       --host_copt="-Wno-uninitialized" --verbose_failures \
       package
-
-  bazelisk shutdown
 }
 
 install_mozc-common() {
