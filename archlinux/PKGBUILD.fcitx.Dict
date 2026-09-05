@@ -9,8 +9,8 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=ed4dc92d59fde6827f95313694794a2abf4cc1bc
-_bcr_commit=0eae4cfba904e53f27308f84909041ab0ca06f1a
+_mozc_commit=6b20c794f3112075703bae1603a81dce86b1f44e
+_bcr_commit=a5e087e21fcac28ff105ffc5eaeca966e61057af
 _dict_to_mozc_commit=cad5cefbb541f4184547241fd35905eb8ba8a81c
 _dict_to_mozc=v0.6.30
 
@@ -21,7 +21,7 @@ _sudachidict_date=20260723
 pkgbase=mozc-with-jp-dict
 pkgname=("fcitx-$pkgbase")
 pkgver=3.34.6239.2
-pkgrel=19
+pkgrel=20
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
@@ -43,8 +43,8 @@ source=(git+https://github.com/fcitx/mozc.git#commit="${_mozc_commit}"
         LICENSE-MeCab-ipadic-Neologd::https://github.com/neologd/mecab-ipadic-neologd/raw/refs/heads/master/COPYING
 )
 
-sha512sums=('d79a046374eadd3d49391060c66e66936ca5d0034b367ccaf8112be2b0fddd44e292285a952dcb14efd4c6c381cde241fbcce4dd576d44189bab88f23361fc64'
-            '9ca4740e9be935fa9a30046cb5a36487d9c28b461f66b38728d86d26b55d02d4ac8b8f7f6cb15429a619c80728cdbc1563de73b21dc07d458d0b2a79e978afe4'
+sha512sums=('1ef221f5c1bf8ad493168caaa7ebb76cea7af86b3da9755233ffc1b9676b2efd0dc02d4de78a6d9cc08f99a77576bc22ad278ef8047f18dc8c882d88f03bd5a0'
+            'b7ebfd547649cff05220c977ad0f19d7cfb63cb412cdcb70303c90a89b60ba8d74ce58852f8d90e92210e8d2d436142b2938a85bd5839e0a3ab309cdb00a1fec'
             'e913bb48b6358eea4ca67397de03d48b8db073a634d078df48a0c13be31a0d52fa73c8390712bf2af28f5c2af4a540282d817658356e5fa996e592044574c3b3'
             '2f44950fe396fa803094abc344a47d50fb32ad6946441e7a8d94dcfa141a8a08d1965d5da8038094bf752301ddf6aa20fb629ba288457ae34778082a5baf994c'
             '39fa5ce4c8f6e0ba1f968c3197b51be3f94d06b271dbe2bad5d91bb81d8410eb2028b7bdfb5af093e9b4315fc35b4042b1f2e6e5e86ab8b1ce8406d39026ad1b'
