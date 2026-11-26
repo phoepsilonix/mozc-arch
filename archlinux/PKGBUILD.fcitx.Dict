@@ -9,8 +9,8 @@
 
 ## Mozc compile option
 _bldtype=Release
-_mozc_commit=20cb584577efa23cc79dfcb308d03de3d5de16aa
-_bcr_commit=a4c629deed1a3cfb349986247dcfee4fb871279d
+_mozc_commit=f18c2845d724fcf6bb8c923f127c7fcc5ec9b2ec
+_bcr_commit=null
 _dict_to_mozc_commit=cad5cefbb541f4184547241fd35905eb8ba8a81c
 _dict_to_mozc=v0.6.30
 
@@ -21,7 +21,7 @@ _sudachidict_date=20261015
 pkgbase=mozc-with-jp-dict
 pkgname=("fcitx-$pkgbase")
 pkgver=3.35.6354.2
-pkgrel=15
+pkgrel=16
 arch=('x86_64')
 url="https://github.com/fcitx/mozc"
 license=('Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND LGPL-3.0-only AND MIT AND NAIST-2003')
